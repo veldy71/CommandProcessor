@@ -1,9 +1,11 @@
 ﻿using System;
+using System.Diagnostics;
+using System.Globalization;
 
-namespace Veldy.Net.CommandProcessor.Buffer
+namespace Veldy.Net.CommandProcessor.Text
 {
     public abstract class Command<TEnumMessageId, TResponse> : Message<TEnumMessageId>, ICommand<TResponse>
-        where TResponse : class, IResponse, IResponse<byte[]>, IMessage, IMessage<byte[]>, new()
+        where TResponse : class, IResponse, IResponse<string>, IMessage, IMessage<string>, new()
         where TEnumMessageId : struct, IConvertible
     {
         private readonly TEnumMessageId _messageId;
@@ -33,7 +35,7 @@ namespace Veldy.Net.CommandProcessor.Buffer
         /// </summary>
         /// <param name="store">The store.</param>
         /// <returns></returns>
-        public TResponse CreateResponse(byte[] store)
+        public TResponse CreateResponse(string store)
         {
             if (Key.CompareTo(store) == 0)
             {
@@ -50,20 +52,15 @@ namespace Veldy.Net.CommandProcessor.Buffer
         /// Executes this command.
         /// </summary>
         /// <returns></returns>
-        public virtual byte[] Execute()
+        public virtual string Execute()
         {
-            Store = new byte[BufferLength];
-            Store[0] = (byte)Convert.ToByte(_messageId);
+            var type = typeof(TEnumMessageId);
+            var memInfo = type.GetMember(MessageId.ToString(CultureInfo.InvariantCulture));
+            var attributes = memInfo[0].GetCustomAttributes(typeof(EnumTextAttribute),
+                false);
+            Store = ((EnumTextAttribute)attributes[0]).Text;
 
             return Store;
         }
-
-        /// <summary>
-        /// Gets the length of the buffer.
-        /// </summary>
-        /// <value>
-        /// The length of the buffer.
-        /// </value>
-        protected override int BufferLength { get { return 1; } }
     }
 }

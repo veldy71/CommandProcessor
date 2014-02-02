@@ -1,7 +1,6 @@
 ﻿using System;
-using Veldy.Net.CommandProcessor;
 
-namespace Veldy.Net.CommandProcess.Buffer
+namespace Veldy.Net.CommandProcessor.Buffer
 {
     public abstract class Message<TEnumMessageId> : IMessage
         where TEnumMessageId : struct, IConvertible
@@ -11,7 +10,7 @@ namespace Veldy.Net.CommandProcess.Buffer
         /// </summary>
         protected Message()
         {
-            this.Key = new Key<Message<TEnumMessageId>>(this);
+            Key = new Key<Message<TEnumMessageId>>(this);
         }
 
         /// <summary>
@@ -22,7 +21,7 @@ namespace Veldy.Net.CommandProcess.Buffer
         /// </value>
         public virtual TEnumMessageId MessageId
         {
-            get { return (TEnumMessageId) Enum.ToObject(typeof (TEnumMessageId), this.Store[0]); }
+            get { return (TEnumMessageId) Enum.ToObject(typeof (TEnumMessageId), Store[0]); }
         }
 
         /// <summary>
@@ -54,7 +53,10 @@ namespace Veldy.Net.CommandProcess.Buffer
         /// </summary>
         /// <param name="other">The other.</param>
         /// <returns></returns>
-        public abstract int CompareTo(byte[] other);
+        public virtual int CompareTo(byte[] other)
+        {
+            return Key.CompareTo(other);
+        }
 
         /// <summary>
         /// Sets the byte array.

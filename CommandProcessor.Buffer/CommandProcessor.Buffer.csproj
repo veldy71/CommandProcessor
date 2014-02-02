@@ -51,7 +51,9 @@
   </Choose>
   <ItemGroup>
     <Compile Include="Command.cs" />
+    <Compile Include="CommandProcessor.cs" />
     <Compile Include="ICommand.cs" />
+    <Compile Include="ICommandProcessor.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IResponse.cs" />
     <Compile Include="Key.cs" />

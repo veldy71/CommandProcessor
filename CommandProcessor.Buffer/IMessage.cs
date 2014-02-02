@@ -1,6 +1,4 @@
-﻿using Veldy.Net.CommandProcessor;
-
-namespace Veldy.Net.CommandProcess.Buffer
+﻿namespace Veldy.Net.CommandProcessor.Buffer
 {
     public interface IMessage : IMessage<byte[]>
     {

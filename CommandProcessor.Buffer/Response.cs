@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Veldy.Net.CommandProcess.Buffer
+namespace Veldy.Net.CommandProcessor.Buffer
 {
     public abstract class Response<TEnumMessageId> : Message<TEnumMessageId>, IResponse
         where TEnumMessageId : struct, IConvertible
@@ -26,7 +26,7 @@ namespace Veldy.Net.CommandProcess.Buffer
         /// </value>
         protected override int BufferLength
         {
-            get { return this.Store.Length; }
+            get { return Store.Length; }
         }
 
         /// <summary>

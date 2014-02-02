@@ -1,4 +1,4 @@
-﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicCommands
+﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
     enum MessageIdentifier : byte
     {
