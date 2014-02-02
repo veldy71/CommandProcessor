@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace CommandProcessor
+﻿namespace Veldy.Net.CommandProcessor
 {
-    public class CommandProcessor
+    public class CommandProcessor : ICommandProcessor
     {
     }
 }

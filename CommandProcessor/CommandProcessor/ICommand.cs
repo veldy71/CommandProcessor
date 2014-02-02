@@ -1,11 +1,20 @@
-﻿using System;
-
-namespace Veldy.Net.CommandProcessor
+﻿namespace Veldy.Net.CommandProcessor
 {
-    public interface ICommand<out TStore, TResponse> : IMessage<TStore>
-        where TStore : struct, IConvertible
+    public interface ICommand<TStore, out TResponse> : IMessage<TStore> 
+        where TStore : class
         where TResponse : class, IResponse<TStore>, IMessage<TStore>
     {
-         TResponse CreateResponse(TStore store);
+        /// <summary>
+        /// Creates the response.
+        /// </summary>
+        /// <param name="store">The store.</param>
+        /// <returns></returns>
+        TResponse CreateResponse(TStore store);
+
+        /// <summary>
+        /// Executes this command.
+        /// </summary>
+        /// <returns></returns>
+        TStore Execute();
     }
 }

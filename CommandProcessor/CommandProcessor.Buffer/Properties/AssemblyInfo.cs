@@ -1,14 +1,15 @@
 ﻿using System.Reflection;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
-[assembly: AssemblyTitle("CommandProcessor")]
+[assembly: AssemblyTitle("CommandProcessor.Buffer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
-[assembly: AssemblyProduct("CommandProcessor")]
+[assembly: AssemblyProduct("CommandProcessor.Buffer")]
 [assembly: AssemblyCopyright("Copyright ©  2014")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
@@ -19,7 +20,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("1596da57-ddf8-416c-acff-ac9711f737f2")]
+[assembly: Guid("db216a51-bcc7-4ebb-aa92-72eadccae9a2")]
 
 // Version information for an assembly consists of the following four values:
 //

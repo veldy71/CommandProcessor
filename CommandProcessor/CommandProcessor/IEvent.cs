@@ -1,9 +1,7 @@
-﻿using System;
-
-namespace Veldy.Net.CommandProcessor
+﻿namespace Veldy.Net.CommandProcessor
 {
-    public interface IEvent<out TStore> : IMessage<TStore>
-        where TStore : struct, IConvertible
+    public interface IEvent<TStore> : IMessage<TStore>
+        where TStore : class
     {
     }
 }

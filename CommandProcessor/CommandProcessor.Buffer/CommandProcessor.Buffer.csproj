@@ -3,11 +3,11 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProjectGuid>{E395BEE5-3B4A-4AA7-8E3C-C9011CB6D26D}</ProjectGuid>
+    <ProjectGuid>{34429C6F-C15A-401B-983B-A6C8EFAB54C6}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Veldy.Net.CommandProcessor.UnitTests</RootNamespace>
-    <AssemblyName>Veldy.Net.CommandProcessor.UnitTests</AssemblyName>
+    <RootNamespace>Veldy.Net.CommandProcessor.Buffer</RootNamespace>
+    <AssemblyName>Veldy.Net.CommandProcessor.Buffer</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -36,10 +36,6 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
-    <Reference Include="System.Data" />
-    <Reference Include="System.Drawing" />
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="System.Xml" />
   </ItemGroup>
   <Choose>
     <When Condition="('$(VisualStudioVersion)' == '10.0' or '$(VisualStudioVersion)' == '') and '$(TargetFrameworkVersion)' == 'v3.5'">
@@ -54,22 +50,15 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
-    <Compile Include="BasicCommands\Echo.cs" />
-    <Compile Include="BasicCommands\Enums.cs" />
-    <Compile Include="CommandTests.cs" />
+    <Compile Include="UnitTest1.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CommandProcess.Buffer\CommandProcess.Buffer.csproj">
-      <Project>{da15c0e5-9b1c-42ab-af66-a16fd78b00ad}</Project>
-      <Name>CommandProcess.Buffer</Name>
-    </ProjectReference>
     <ProjectReference Include="..\CommandProcessor\CommandProcessor.csproj">
       <Project>{a87013f1-ed77-46d4-b72b-8ccf0000516c}</Project>
       <Name>CommandProcessor</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
