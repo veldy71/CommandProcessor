@@ -60,9 +60,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\CommandProcess.Buffer\CommandProcess.Buffer.csproj">
+    <ProjectReference Include="..\CommandProcess.Buffer\CommandProcessor.Buffer.csproj">
       <Project>{da15c0e5-9b1c-42ab-af66-a16fd78b00ad}</Project>
-      <Name>CommandProcess.Buffer</Name>
+      <Name>CommandProcessor.Buffer</Name>
     </ProjectReference>
     <ProjectReference Include="..\CommandProcessor\CommandProcessor.csproj">
       <Project>{a87013f1-ed77-46d4-b72b-8ccf0000516c}</Project>
