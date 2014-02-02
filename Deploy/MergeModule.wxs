@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+	<Module Id="Deploy" Language="1033" Version="1.0.0.0">
+		<Package Id="ae161d65-dfc4-4695-a358-fb449c10c874" Manufacturer="Veldy.net" InstallerVersion="200" />
+		<Directory Id="TARGETDIR" Name="SourceDir">
+			<Directory Id="MergeRedirectFolder">
+				 <Component Id="CommandProcessor" Guid="08CCF6FD-48FA-4190-9DDF-5429198A979D">
+           <File Id="CommandProcessor" Name="$(var.CommandProcessor.TargetFileName)" Source="$(var.CommandProcessor.TargetPath)" DiskId="1" />
+           <File Id="CommandProcessor.Buffer" Name="$(var.CommandProcessor.Buffer.TargetFileName)" Source="$(var.CommandProcessor.Buffer.TargetPath)" DiskId="1" />
+           <File Id="CommandProcessor.Text" Name="$(var.CommandProcessor.Text.TargetFileName)" Source="$(var.CommandProcessor.Text.TargetPath)" DiskId="1" />
+				 </Component> 
+			</Directory>
+		</Directory>
+	</Module>
+</Wix>
