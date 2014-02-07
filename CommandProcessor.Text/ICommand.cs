@@ -1,7 +1,10 @@
-﻿namespace Veldy.Net.CommandProcessor.Text
+﻿using System;
+
+namespace Veldy.Net.CommandProcessor.Text
 {
-    public interface ICommand<out TResponse> : ICommand<string, TResponse>
-        where TResponse : class, IResponse, IResponse<string>, IMessage, IMessage<string>
-    {
-    }
+	public interface ICommand<out TIdentifer, out TResponse> : ICommand<TIdentifer, string, TResponse>
+		where TIdentifer : struct, IConvertible
+		where TResponse : class, IResponse<TIdentifer>, IResponse<TIdentifer, string>, IMessage<TIdentifer>, IMessage<TIdentifer, string>
+	{
+	}
 }

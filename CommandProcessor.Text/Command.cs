@@ -1,34 +1,41 @@
 ﻿using System;
-using System.Diagnostics;
-using System.Globalization;
 
 namespace Veldy.Net.CommandProcessor.Text
 {
-    public abstract class Command<TEnumMessageId, TResponse> : Message<TEnumMessageId>, ICommand<TResponse>
-        where TResponse : class, IResponse, IResponse<string>, IMessage, IMessage<string>, new()
-        where TEnumMessageId : struct, IConvertible
+    public abstract class Command<TIdentifier, TResponse> : Message<TIdentifier>, ICommand<TIdentifier, TResponse>
+        where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, string>, IMessage<TIdentifier>, IMessage<TIdentifier, string>, new()
+        where TIdentifier : struct, IConvertible
     {
-        private readonly TEnumMessageId _messageId;
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Command{TIdentifier, TResponse}"/> class.
+		/// </summary>
+		/// <param name="identifier">The identifier.</param>
+        protected Command(TIdentifier identifier) : base(identifier)
+        { }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Command{TEnumMessageId, TResponse}"/> class.
-        /// </summary>
-        /// <param name="messageId">The message identifier.</param>
-        protected Command(TEnumMessageId messageId)
-        {
-            _messageId = messageId;
-        }
+		/// <summary>
+		/// Gets the store.
+		/// </summary>
+		/// <value>
+		/// The store.
+		/// </value>
+		public override string Store
+		{
+			get
+			{
+				var store = base.Store;
 
-        /// <summary>
-        /// Gets the message identifier.
-        /// </summary>
-        /// <value>
-        /// The message identifier.
-        /// </value>
-        public override TEnumMessageId MessageId
-        {
-            get { return _messageId; }
-        }
+				PopulateStore(ref store);
+
+				return store;
+			}
+		}
+
+		/// <summary>
+		/// Populates the store.
+		/// </summary>
+		/// <param name="store">The store.</param>
+		protected abstract void PopulateStore(ref string store);
 
         /// <summary>
         /// Creates the response.
@@ -37,30 +44,16 @@ namespace Veldy.Net.CommandProcessor.Text
         /// <returns></returns>
         public TResponse CreateResponse(string store)
         {
-            if (Key.CompareTo(store) == 0)
+			var response = new TResponse();
+
+            if (response.Key.CompareTo(store) == 0)
             {
-                var response = new TResponse();
                 response.SetStore(store);
 
                 return response;
             }
 
             return null;
-        }
-
-        /// <summary>
-        /// Executes this command.
-        /// </summary>
-        /// <returns></returns>
-        public virtual string Execute()
-        {
-            var type = typeof(TEnumMessageId);
-            var memInfo = type.GetMember(MessageId.ToString(CultureInfo.InvariantCulture));
-            var attributes = memInfo[0].GetCustomAttributes(typeof(EnumTextAttribute),
-                false);
-            Store = ((EnumTextAttribute)attributes[0]).Text;
-
-            return Store;
         }
     }
 }

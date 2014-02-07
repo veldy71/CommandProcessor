@@ -2,9 +2,16 @@
 
 namespace Veldy.Net.CommandProcessor.Text
 {
-    public abstract class Response<TEnumMessageId> : Message<TEnumMessageId>, IResponse
-        where TEnumMessageId : struct, IConvertible
+    public abstract class Response<TIdentifier> : Message<TIdentifier>, IResponse<TIdentifier>
+        where TIdentifier : struct, IConvertible
     {
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Response{TIdentifier}"/> class.
+		/// </summary>
+		/// <param name="identifier">The identifier.</param>
+		protected Response(TIdentifier identifier) : base(identifier)
+		{ }
+
         /// <summary>
         /// Sets the store.
         /// </summary>

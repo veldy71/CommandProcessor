@@ -2,9 +2,20 @@
 
 namespace Veldy.Net.CommandProcessor.Buffer
 {
-    public abstract class Response<TEnumMessageId> : Message<TEnumMessageId>, IResponse
-        where TEnumMessageId : struct, IConvertible
+    public abstract class Response<TIdentifier> : Message<TIdentifier>, IResponse<TIdentifier>
+        where TIdentifier : struct, IConvertible
     {
+	    private int _storeLength = 0;
+
+	    /// <summary>
+	    /// Initializes a new instance of the <see cref="Response{TIdentifier}"/> class.
+	    /// </summary>
+	    /// <param name="identifier">The identifier.</param>
+	    protected Response(TIdentifier identifier) : base(identifier)
+	    {
+		    _storeLength = this.Key.Store.Length;
+	    }
+
         /// <summary>
         /// Sets the store.
         /// </summary>
@@ -16,6 +27,7 @@ namespace Veldy.Net.CommandProcessor.Buffer
                 throw new ArgumentNullException("store");
 
             Store = store;
+	        _storeLength = store.Length;
         }
 
         /// <summary>
@@ -26,7 +38,7 @@ namespace Veldy.Net.CommandProcessor.Buffer
         /// </value>
         protected override int BufferLength
         {
-            get { return Store.Length; }
+            get { return _storeLength; }
         }
 
         /// <summary>

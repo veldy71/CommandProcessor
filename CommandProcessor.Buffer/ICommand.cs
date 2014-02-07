@@ -1,7 +1,10 @@
-﻿namespace Veldy.Net.CommandProcessor.Buffer
+﻿using System;
+
+namespace Veldy.Net.CommandProcessor.Buffer
 {
-    public interface ICommand<out TResponse> : ICommand<byte[], TResponse>
-        where TResponse : class, IResponse, IResponse<byte[]>, IMessage, IMessage<byte[]>
+    public interface ICommand<out TIdentifer, out TResponse> : ICommand<TIdentifer, byte[], TResponse>
+		where TIdentifer : struct, IConvertible
+        where TResponse : class, IResponse<TIdentifer>, IResponse<TIdentifer, byte[]>, IMessage<TIdentifer>, IMessage<TIdentifer, byte[]>
     {
     }
 }

@@ -4,7 +4,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 {
     enum MessageIdentifier
     {
-        [EnumText("ECHO")]
+		[EnumText("ECHO")]
         Echo
     }
 }

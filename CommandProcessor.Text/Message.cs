@@ -2,15 +2,18 @@
 
 namespace Veldy.Net.CommandProcessor.Text
 {
-    public abstract class Message<TEnumMessageId> : IMessage
-        where TEnumMessageId : struct, IConvertible
+    public abstract class Message<TIdentifier> : IMessage<TIdentifier>
+        where TIdentifier : struct, IConvertible
     {
+	    private string _store = string.Empty;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Message{TEnumMessageId}"/> class.
         /// </summary>
-        protected Message()
+        protected Message(TIdentifier identifier)
         {
-            Key = new Key<Message<TEnumMessageId>>(this);
+            Key = new Key<TIdentifier>(identifier);
+	        _store = this.Key.Store;
         }
 
         /// <summary>
@@ -22,31 +25,30 @@ namespace Veldy.Net.CommandProcessor.Text
         protected virtual char Delimeter { get { return ' '; } }
 
         /// <summary>
-        /// Gets the message identifier.
-        /// </summary>
-        /// <value>
-        /// The message identifier.
-        /// </value>
-        public virtual TEnumMessageId MessageId
-        {
-            get { return (TEnumMessageId)Enum.ToObject(typeof(TEnumMessageId), Store[0]); }
-        }
-
-        /// <summary>
         /// Gets or sets the key.
         /// </summary>
         /// <value>
         /// The key.
         /// </value>
-        public IKey<IMessage<string>, string> Key { get; protected set; }
+        public IKey<TIdentifier, string> Key { get; protected set; }
 
-        /// <summary>
-        /// Gets the store.
-        /// </summary>
-        /// <value>
-        /// The store.
-        /// </value>
-        public string Store { get; protected set; }
+		/// <summary>
+		/// Gets the store.
+		/// </summary>
+		/// <value>
+		/// The store.
+		/// </value>
+		public virtual string Store
+		{
+			get
+			{
+				return _store;
+			}
+			protected set
+			{
+				_store = value ?? this.Key.Store;
+			}
+		}
 
         /// <summary>
         /// Gets the store parts.

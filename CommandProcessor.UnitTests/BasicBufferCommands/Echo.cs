@@ -25,7 +25,16 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
             set { _payload = value ?? new byte[0]; }
         }
 
-        /// <summary>
+		/// <summary>
+		/// Populates the store.
+		/// </summary>
+		/// <param name="store">The store.</param>
+	    protected override void PopulateStore(byte[] store)
+	    {
+		    SetByteArray(store, this.Key.Store.Length, this.PayLoad);
+	    }
+
+	    /// <summary>
         /// Gets the length of the buffer.
         /// </summary>
         /// <value>
@@ -35,25 +44,19 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
         {
             get { return base.BufferLength + PayLoad.Length; }
         }
-
-        /// <summary>
-        /// Executes this instance.
-        /// </summary>
-        /// <returns></returns>
-        public override byte[] Execute()
-        {
-            var store = base.Execute();
-            
-            if (PayLoad != null && PayLoad.Length > 0)
-                SetByteArray(store, 1, PayLoad);
-
-            return store;
-        }
     }
 
     sealed class EchoResponse : Response<MessageIdentifier>
     {
-        /// <summary>
+		/// <summary>
+		/// Initializes a new instance of the <see cref="EchoResponse"/> class.
+		/// </summary>
+		public EchoResponse()
+			: base(MessageIdentifier.Echo)
+	    {
+	    }
+
+	    /// <summary>
         /// Gets the payload.
         /// </summary>
         /// <value>
@@ -61,7 +64,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
         /// </value>
         public byte[] Payload
         {
-            get { return GetByteArray(Store, 1, BufferLength - 1); }
+            get { return GetByteArray(Store, this.Key.Store.Length, BufferLength - 1); }
         }
     }
 }

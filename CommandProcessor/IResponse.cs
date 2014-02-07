@@ -1,7 +1,10 @@
-﻿namespace Veldy.Net.CommandProcessor
+﻿using System;
+
+namespace Veldy.Net.CommandProcessor
 {
-    public interface IResponse<TStore> : IMessage<TStore>
-       where TStore : class
+    public interface IResponse<out TIdentifier, TStore> : IMessage<TIdentifier, TStore>
+		where TIdentifier : struct, IConvertible
+		where TStore : class
     {
         /// <summary>
         /// Sets the store.

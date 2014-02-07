@@ -2,20 +2,17 @@
 
 namespace Veldy.Net.CommandProcessor.Buffer
 {
-    class Key<TTarget> : IKey<TTarget, byte[]>
-        where TTarget : class, IMessage, IMessage<byte[]>
+	class Key<TIdentifier> : IKey<TIdentifier, byte[]>
+		where TIdentifier : struct, IConvertible
     {
         /// <summary>
         /// Initializes a new instance of the <see cref="Key{TTarget}"/> class.
         /// </summary>
-        /// <param name="target">The target.</param>
+        /// <param name="identifier">The target.</param>
         /// <exception cref="System.ArgumentNullException">target</exception>
-        public Key(TTarget target)
+		public Key(TIdentifier identifier)
         {
-            if (target == null)
-                throw new ArgumentNullException("target");
-
-            Target = target;
+            Identifier = identifier;
         }
 
         /// <summary>
@@ -27,8 +24,18 @@ namespace Veldy.Net.CommandProcessor.Buffer
         /// </returns>
         public int CompareTo(byte[] other)
         {
-            // only compare the first byte
-            return Target.Store[0].CompareTo(other[0]);
+	        if (other == null)
+		        return int.MaxValue;
+
+	        if (other.Length < this.Store.Length)
+		        return this.Store[other.Length].CompareTo(0);
+
+	        var v = 0;
+
+	        for (var i = 0; v == 0 && i < this.Store.Length; i++)
+		        v = this.Store[i].CompareTo(other[i]);
+
+	        return v;
         }
 
         /// <summary>
@@ -37,6 +44,14 @@ namespace Veldy.Net.CommandProcessor.Buffer
         /// <value>
         /// The target.
         /// </value>
-        public TTarget Target { get; private set; }
+        public TIdentifier Identifier { get; private set; }
+
+		/// <summary>
+		/// Gets the store.
+		/// </summary>
+		/// <value>
+		/// The store.
+		/// </value>
+		public virtual byte[] Store { get { return new[] {Convert.ToByte(this.Identifier)}; } }
     }
 }

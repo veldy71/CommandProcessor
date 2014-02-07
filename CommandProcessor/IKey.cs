@@ -2,16 +2,24 @@
 
 namespace Veldy.Net.CommandProcessor
 {
-    public interface IKey<out TTarget, in TStore> : IComparable<TStore>
-        where TTarget : class, IMessage<TStore>, IComparable<TStore>
+    public interface IKey<out TIdentifier, TStore> : IComparable<TStore>
+        where TIdentifier : struct, IConvertible
         where TStore : class
     {
         /// <summary>
-        /// Gets the target.
+        /// Gets the identifier.
         /// </summary>
         /// <value>
-        /// The target.
+		/// The identifier.
         /// </value>
-        TTarget Target { get; }
+        TIdentifier Identifier { get; }
+
+		/// <summary>
+		/// Gets the store.
+		/// </summary>
+		/// <value>
+		/// The store.
+		/// </value>
+		TStore Store { get; }
     }
 }

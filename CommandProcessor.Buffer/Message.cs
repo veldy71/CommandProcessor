@@ -2,26 +2,17 @@
 
 namespace Veldy.Net.CommandProcessor.Buffer
 {
-    public abstract class Message<TEnumMessageId> : IMessage
-        where TEnumMessageId : struct, IConvertible
+    public abstract class Message<TIdentifier> : IMessage<TIdentifier>
+        where TIdentifier : struct, IConvertible
     {
+	    private byte[] _store = null;
+
         /// <summary>
         /// Initializes a new instance of the <see cref="Message{TEnumMessageId}"/> class.
         /// </summary>
-        protected Message()
+        protected Message(TIdentifier messageId)
         {
-            Key = new Key<Message<TEnumMessageId>>(this);
-        }
-
-        /// <summary>
-        /// Gets the message identifier.
-        /// </summary>
-        /// <value>
-        /// The message identifier.
-        /// </value>
-        public virtual TEnumMessageId MessageId
-        {
-            get { return (TEnumMessageId) Enum.ToObject(typeof (TEnumMessageId), Store[0]); }
+			Key = new Key<TIdentifier>(messageId);
         }
 
         /// <summary>
@@ -30,7 +21,7 @@ namespace Veldy.Net.CommandProcessor.Buffer
         /// <value>
         /// The length of the buffer.
         /// </value>
-        protected virtual int BufferLength { get { return 1; } }
+        protected virtual int BufferLength { get { return this.Key.Store.Length; } }
 
         /// <summary>
         /// Gets or sets the key.
@@ -38,15 +29,27 @@ namespace Veldy.Net.CommandProcessor.Buffer
         /// <value>
         /// The key.
         /// </value>
-        public IKey<IMessage<byte[]>, byte[]> Key { get; protected set; }
+        public IKey<TIdentifier, byte[]> Key { get; protected set; }
 
-        /// <summary>
-        /// Gets the store.
-        /// </summary>
-        /// <value>
-        /// The store.
-        /// </value>
-        public byte[] Store { get; protected set; }
+	    /// <summary>
+	    /// Gets the store.
+	    /// </summary>
+	    /// <value>
+	    /// The store.
+	    /// </value>
+	    public virtual byte[] Store
+	    {
+		    get
+		    {
+			    if (_store == null || _store.Length != this.BufferLength)
+			    {
+				    _store = new byte[this.BufferLength];
+			    }
+
+			    return _store;
+		    }
+		    protected set { _store = value ?? new byte[this.Key.Store.Length]; }
+	    }
 
         /// <summary>
         /// Compares to.

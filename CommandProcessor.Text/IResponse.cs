@@ -1,6 +1,9 @@
-﻿namespace Veldy.Net.CommandProcessor.Text
+﻿using System;
+
+namespace Veldy.Net.CommandProcessor.Text
 {
-    public interface IResponse : IResponse<string>
-    {
-    }
+	public interface IResponse<out TIdentifier> : IResponse<TIdentifier, string>
+		where TIdentifier : struct, IConvertible
+	{
+	}
 }

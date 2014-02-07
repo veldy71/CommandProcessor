@@ -19,7 +19,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
             var responseStore = new byte[] { (byte)MessageIdentifier.Echo, 0x01, 0x02, 0x03, 0x04, 0x05 };
 
             var command = new EchoCommand { PayLoad = payload };
-            var store = command.Execute();
+            var store = command.Store;
             Assert.IsTrue(BufferCompare(store, commandStore), "EchoCommand.Execute() creates invalid store.");
 
             var response = command.CreateResponse(responseStore);
@@ -37,7 +37,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
             var responseStore = "ECHO " + Convert.ToBase64String(payload);
 
             var command = new EchoComand {Payload = payload};
-            var store = command.Execute();
+            var store = command.Store;
             Assert.IsTrue(store == commandStore, "EchoCommand.Execute() creates invalid store.");
 
             var response = command.CreateResponse(responseStore);

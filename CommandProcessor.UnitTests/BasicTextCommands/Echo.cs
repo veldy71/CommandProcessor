@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text;
 using Veldy.Net.CommandProcessor.Text;
 
 namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
@@ -14,7 +15,19 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
         {
         }
 
-        /// <summary>
+		/// <summary>
+		/// Populates the store.
+		/// </summary>
+		/// <param name="store">The store.</param>
+	    protected override void PopulateStore(ref string store)
+	    {
+		    var sb = new StringBuilder();
+		    sb.Append(store).Append(this.Delimeter).Append(Convert.ToBase64String(this.Payload));
+
+		    store = sb.ToString();
+	    }
+
+	    /// <summary>
         /// Gets or sets the payload.
         /// </summary>
         /// <value>
@@ -25,25 +38,19 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
             get { return _payload; }
             set { _payload = value ?? new byte[0]; }
         }
-
-        /// <summary>
-        /// Executes this instance.
-        /// </summary>
-        /// <returns></returns>
-        public override string Execute()
-        {
-            var store = base.Execute();
-
-            return string.Format("{0}{1}{2}",
-                store,
-                Delimeter,
-                Convert.ToBase64String(_payload));
-        }
     }
 
     sealed class EchoResponse : Response<MessageIdentifier>
     {
-        /// <summary>
+		/// <summary>
+		/// Initializes a new instance of the <see cref="EchoResponse"/> class.
+		/// </summary>
+		public EchoResponse()
+			: base(MessageIdentifier.Echo)
+	    {
+	    }
+
+	    /// <summary>
         /// Gets the payload.
         /// </summary>
         /// <value>

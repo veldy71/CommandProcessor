@@ -2,7 +2,8 @@
 
 namespace Veldy.Net.CommandProcessor
 {
-    public interface IMessage<TStore> : IComparable<TStore>
+    public interface IMessage<out TIdentifier, TStore> 
+		where TIdentifier : struct, IConvertible
         where TStore : class
     {
         /// <summary>
@@ -11,7 +12,7 @@ namespace Veldy.Net.CommandProcessor
         /// <value>
         /// The key.
         /// </value>
-        IKey<IMessage<TStore>, TStore> Key { get; } 
+        IKey<TIdentifier, TStore> Key { get; } 
         
         /// <summary>
         /// Gets the store.

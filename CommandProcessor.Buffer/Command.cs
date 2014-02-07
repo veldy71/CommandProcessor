@@ -2,42 +2,54 @@
 
 namespace Veldy.Net.CommandProcessor.Buffer
 {
-    public abstract class Command<TEnumMessageId, TResponse> : Message<TEnumMessageId>, ICommand<TResponse>
-        where TResponse : class, IResponse, IResponse<byte[]>, IMessage, IMessage<byte[]>, new()
-        where TEnumMessageId : struct, IConvertible
+	public abstract class Command<TIdentifier, TResponse> : Message<TIdentifier>, ICommand<TIdentifier, TResponse>
+		where TIdentifier : struct, IConvertible
+		where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, byte[]>, IMessage<TIdentifier>, IMessage<TIdentifier, byte[]>, new()
     {
-        private readonly TEnumMessageId _messageId;
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Command{TIdentifier, TResponse}"/> class.
+		/// </summary>
+		/// <param name="identifier">The identifier.</param>
+        protected Command(TIdentifier identifier) : base(identifier)
+        { }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Command{TEnumMessageId, TResponse}"/> class.
-        /// </summary>
-        /// <param name="messageId">The message identifier.</param>
-        protected Command(TEnumMessageId messageId)
-        {
-            _messageId = messageId;
-        }
+		/// <summary>
+		/// Gets the store.
+		/// </summary>
+		/// <value>
+		/// The store.
+		/// </value>
+	    public override byte[] Store
+	    {
+		    get
+		    {
+			    var store = base.Store;
 
-        /// <summary>
-        /// Gets the message identifier.
-        /// </summary>
-        /// <value>
-        /// The message identifier.
-        /// </value>
-        public override TEnumMessageId MessageId
-        {
-            get { return _messageId; }
-        }
+			    System.Buffer.BlockCopy(this.Key.Store, 0, store, 0, this.Key.Store.Length);
 
-        /// <summary>
+				PopulateStore(store);
+
+			    return store;
+		    }
+	    }
+
+		/// <summary>
+		/// Populates the store.
+		/// </summary>
+		/// <param name="store">The store.</param>
+	    protected abstract void PopulateStore(byte[] store);
+
+	    /// <summary>
         /// Creates the response.
         /// </summary>
         /// <param name="store">The store.</param>
         /// <returns></returns>
         public TResponse CreateResponse(byte[] store)
         {
-            if (Key.CompareTo(store) == 0)
+			var response = new TResponse();
+
+            if (response.Key.CompareTo(store) == 0)
             {
-                var response = new TResponse();
                 response.SetStore(store);
 
                 return response;
@@ -47,23 +59,11 @@ namespace Veldy.Net.CommandProcessor.Buffer
         }
 
         /// <summary>
-        /// Executes this command.
-        /// </summary>
-        /// <returns></returns>
-        public virtual byte[] Execute()
-        {
-            Store = new byte[BufferLength];
-            Store[0] = (byte)Convert.ToByte(_messageId);
-
-            return Store;
-        }
-
-        /// <summary>
         /// Gets the length of the buffer.
         /// </summary>
         /// <value>
         /// The length of the buffer.
         /// </value>
-        protected override int BufferLength { get { return 1; } }
+        protected override int BufferLength { get { return this.Key.Store.Length; } }
     }
 }
