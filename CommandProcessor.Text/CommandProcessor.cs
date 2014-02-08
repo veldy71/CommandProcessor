@@ -2,10 +2,11 @@
 
 namespace Veldy.Net.CommandProcessor.Text
 {
-    public abstract class CommandProcessor<TIdentifier, TCommandResponse, TResponse>
-        : CommandProcessor<TIdentifier, string, TCommandResponse, TResponse>, ICommandProcessor<TIdentifier, TCommandResponse, TResponse>
+	public abstract class CommandProcessorCommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse> 
+        : CommandProcessor<TIdentifier, string, TCommand, TCommandWithResponse, TResponse>, ICommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse>
         where TIdentifier : struct, IConvertible
-        where TCommandResponse : class, ICommandWithResponse<TIdentifier, TResponse>, ICommandWithResponse<TIdentifier, string, TResponse>, ICommand<TIdentifier, string>
-        where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, string>, IMessage<TIdentifier, string>, new()
-    { }
+        where TCommand : class, ICommand<TIdentifier>, ICommand<TIdentifier, string>, IMessage<TIdentifier, string>
+        where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TResponse>, ICommandWithResponse<TIdentifier, string, TResponse>, ICommand<TIdentifier, string>, IMessage<TIdentifier, string>
+		where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, string>, IMessage<TIdentifier, string>, new()
+    {}
 }
