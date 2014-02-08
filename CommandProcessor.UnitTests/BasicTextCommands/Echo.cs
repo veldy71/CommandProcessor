@@ -4,7 +4,7 @@ using Veldy.Net.CommandProcessor.Text;
 
 namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 {
-    sealed class EchoComand : Command<MessageIdentifier, EchoResponse>
+    sealed class EchoComand : CommandWithResponse<MessageIdentifier, EchoResponse>
     {
         private byte[] _payload = new byte[0];
 

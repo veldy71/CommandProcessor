@@ -2,7 +2,7 @@
 
 namespace Veldy.Net.CommandProcessor.Buffer
 {
-    public abstract class Message<TIdentifier> : IMessage<TIdentifier>
+    public abstract class Message<TIdentifier> : IMessage<TIdentifier, byte[]>
         where TIdentifier : struct, IConvertible
     {
 	    private byte[] _store = null;

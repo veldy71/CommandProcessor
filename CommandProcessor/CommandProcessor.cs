@@ -2,11 +2,11 @@
 
 namespace Veldy.Net.CommandProcessor
 {
-	public class CommandProcessor<TIdentifier, TStore, TCommand, TResponse> : ICommandProcessor<TIdentifier, TStore, TCommand, TResponse>
-		where TIdentifier : struct, IConvertible
-		where TStore : class
-		where TCommand : class, ICommand<TIdentifier, TStore, TResponse>, ICommand<TIdentifier, TStore>
-		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
+    public abstract class CommandProcessor<TIdentifier, TStore, TCommandResponse, TResponse> : ICommandProcessor<TIdentifier,TStore, TCommandResponse, TResponse>
+        where TIdentifier : struct, IConvertible
+        where TStore : class
+        where TCommandResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommand<TIdentifier, TStore>
+        where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
     {
     }
 }

@@ -2,7 +2,7 @@
 
 namespace Veldy.Net.CommandProcessor.Text
 {
-    public abstract class Message<TIdentifier> : IMessage<TIdentifier>
+    public abstract class Message<TIdentifier> : IMessage<TIdentifier, string>
         where TIdentifier : struct, IConvertible
     {
 	    private string _store = string.Empty;

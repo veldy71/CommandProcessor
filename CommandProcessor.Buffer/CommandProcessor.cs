@@ -2,10 +2,10 @@
 
 namespace Veldy.Net.CommandProcessor.Buffer
 {
-	public abstract class CommandProcessor<TIdenifier, TCommand, TResponse> : CommandProcessor<TIdenifier, byte[], TCommand, TResponse>, ICommandProcessor<TIdenifier, TCommand, TResponse>
-		where TIdenifier : struct, IConvertible
-		where TCommand : class, ICommand<TIdenifier, TResponse>, ICommand<TIdenifier, byte[], TResponse>, IMessage<TIdenifier>, IMessage<TIdenifier, byte[]> 
-		where TResponse : class, IResponse<TIdenifier>, IResponse<TIdenifier, byte[]>, IMessage<TIdenifier>, IMessage<TIdenifier, byte[]>, new()
-    {
-    }
+	public abstract class CommandProcessor<TIdentifier, TCommandResponse, TResponse> 
+        : CommandProcessor<TIdentifier, byte[], TCommandResponse, TResponse>, ICommandProcessor<TIdentifier, TCommandResponse, TResponse> 
+        where TIdentifier : struct, IConvertible
+        where TCommandResponse : class, ICommandWithResponse<TIdentifier, TResponse>, ICommandWithResponse<TIdentifier, byte[], TResponse>, ICommand<TIdentifier, byte[]>
+        where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>, new()
+    { }
 }

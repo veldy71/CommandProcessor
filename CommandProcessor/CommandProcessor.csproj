@@ -42,6 +42,7 @@
     <Compile Include="CommandProcessor.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="ICommandProcessor.cs" />
+    <Compile Include="ICommandWithResponse.cs" />
     <Compile Include="IEvent.cs" />
     <Compile Include="IKey.cs" />
     <Compile Include="IMessage.cs" />

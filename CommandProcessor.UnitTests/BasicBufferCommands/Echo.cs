@@ -2,7 +2,7 @@
 
 namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
-    sealed class EchoCommand : Command<MessageIdentifier, EchoResponse> 
+    sealed class EchoCommand : CommandWithResponse<MessageIdentifier, EchoResponse> 
     {
         private byte[] _payload = new byte[0];
 
