@@ -27,7 +27,18 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 		    store = sb.ToString();
 	    }
 
-	    /// <summary>
+        /// <summary>
+        /// Gets the length of the response.
+        /// </summary>
+        /// <value>
+        /// The length of the response.
+        /// </value>
+        public override int ResponseLength
+        {
+            get { return 2; }
+        }
+
+        /// <summary>
         /// Gets or sets the payload.
         /// </summary>
         /// <value>

@@ -60,6 +60,14 @@ namespace Veldy.Net.CommandProcessor.Buffer
         }
 
         /// <summary>
+        /// Gets the length of the response.
+        /// </summary>
+        /// <value>
+        /// The length of the response.
+        /// </value>
+        public abstract int ResponseLength { get; }
+
+        /// <summary>
         /// Gets the length of the buffer.
         /// </summary>
         /// <value>

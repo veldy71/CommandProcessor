@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Threading;
 
 namespace Veldy.Net.CommandProcessor
 {
@@ -8,6 +9,8 @@ namespace Veldy.Net.CommandProcessor
         where TIdentifier : struct, IConvertible
         where TStore : class
     {
+        private bool _disposed = false;
+
         /// <summary>
         /// Gets the command.
         /// </summary>
@@ -23,6 +26,14 @@ namespace Veldy.Net.CommandProcessor
         ///   <c>true</c> if [is active]; otherwise, <c>false</c>.
         /// </value>
         public bool IsActive { get; protected set; }
+
+        /// <summary>
+        /// Gets the reset event.
+        /// </summary>
+        /// <value>
+        /// The reset event.
+        /// </value>
+        public ManualResetEvent ResetEvent { get; private set; }
 
         /// <summary>
         /// Gets the exception.
@@ -45,7 +56,24 @@ namespace Veldy.Net.CommandProcessor
             Command = command;
             IsActive = true;
             Exception = null;
+            ResetEvent = new ManualResetEvent(false);
         }
+
+        /// <summary>
+        /// Finalizes an instance of the <see cref="CommandTransaction{TIdentifier, TStore, TCommand}"/> class.
+        /// </summary>
+        ~CommandTransaction()
+        {
+            Dispose(false);
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether [has response].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [has response]; otherwise, <c>false</c>.
+        /// </value>
+        public virtual bool HasResponse { get { return false; } }
 
         /// <summary>
         /// Sets the invactive.
@@ -53,6 +81,7 @@ namespace Veldy.Net.CommandProcessor
         public void SetInvactive()
         {
             IsActive = false;
+            ResetEvent.Set();
         }
 
         /// <summary>
@@ -61,8 +90,36 @@ namespace Veldy.Net.CommandProcessor
         /// <param name="exception">The exception.</param>
         public void SetException(Exception exception)
         {
-            IsActive = false;
+            SetInvactive();
             Exception = exception;
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            GC.SuppressFinalize(this);
+            Dispose(true);
+        }
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        private void Dispose(bool disposing)
+        {
+            if (!_disposed)
+            {
+                if (disposing)
+                {
+                    if (ResetEvent != null)
+                    {
+                        ResetEvent.Dispose();
+                        ResetEvent = null;
+                    }
+                }
+            }
         }
     }
 }

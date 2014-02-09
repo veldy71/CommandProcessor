@@ -34,7 +34,18 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 		    SetByteArray(store, this.Key.Store.Length, this.PayLoad);
 	    }
 
-	    /// <summary>
+        /// <summary>
+        /// Gets the length of the response.
+        /// </summary>
+        /// <value>
+        /// The length of the response.
+        /// </value>
+        public override int ResponseLength
+        {
+            get { return this.PayLoad.Length; }
+        }
+
+        /// <summary>
         /// Gets the length of the buffer.
         /// </summary>
         /// <value>

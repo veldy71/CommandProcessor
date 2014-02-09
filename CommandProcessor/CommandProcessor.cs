@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Threading;
 
 namespace Veldy.Net.CommandProcessor
@@ -12,13 +13,50 @@ namespace Veldy.Net.CommandProcessor
         where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>  
         where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
     {
+        /// <summary>
+        /// Setups the push command functions.
+        /// </summary>
+        /// <param name="pushCommandWithNoResponse">The push command with no response.</param>
+        /// <param name="pushCommandWithResponse">The push command with response.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// pushCommandWithNoResponse
+        /// or
+        /// pushCommandWithResponse
+        /// </exception>
+        protected void SetupPushCommandFunctions(Action<TStore> pushCommandWithNoResponse, Func<TStore, int, TStore> pushCommandWithResponse)
+        {
+            if (pushCommandWithNoResponse == null)
+                throw new ArgumentNullException("pushCommandWithNoResponse");
+
+            if (pushCommandWithResponse == null)
+                throw new ArgumentNullException("pushCommandWithResponse");
+
+            PushCommandWithNoResponse = pushCommandWithNoResponse;
+            PushCommandWithResponse = pushCommandWithResponse;
+        }
+
         private bool _isProcessingCommands = false;
         private Thread _commandProcessingThread = null;
         private readonly AutoResetEvent _processCommandsResetEvent = new AutoResetEvent(false);
-        private readonly AutoResetEvent _processedCommandsResetEvent = new AutoResetEvent(false);
         private readonly object _commandLock = new object();
-        private readonly Queue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>> _commandQueue 
+        private readonly Queue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>> _commandQueue
             = new Queue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>>();
+
+        /// <summary>
+        /// Gets or sets the push command with no response.
+        /// </summary>
+        /// <value>
+        /// The push command with no response.
+        /// </value>
+        private Action<TStore> PushCommandWithNoResponse { get; set; }
+
+        /// <summary>
+        /// Gets or sets the push command with response.
+        /// </summary>
+        /// <value>
+        /// The push command with response.
+        /// </value>
+        private Func<TStore, int, TStore> PushCommandWithResponse { get; set; } 
 
         /// <summary>
         /// Gets the command wait time in milliseconds.
@@ -48,19 +86,23 @@ namespace Veldy.Net.CommandProcessor
         /// <summary>
         /// Sends the command with a response.
         /// </summary>
+        /// <typeparam name="TCmd">The type of the command.</typeparam>
         /// <typeparam name="TRsp">The type of the RSP.</typeparam>
         /// <param name="command">The command.</param>
         /// <returns></returns>
-        public TRsp SendCommand<TRsp>(TCommandWithResponse command) where TRsp : class, TResponse, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
+        /// <exception cref="System.TimeoutException"></exception>
+        public TRsp SendCommand<TCmd, TRsp>(TCmd command) 
+            where TCmd : class, TCommandWithResponse, ICommandWithResponse<TIdentifier, TStore, TRsp>, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>  
+            where TRsp : class, TResponse, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
         {
+            // create the transaction
+            var transaction =
+                new CommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore, TRsp>, TRsp>(command);
+
             try
             {
                 lock (_commandLock)
                 {
-                    // create the transaction
-                    var transaction =
-                        new CommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>(command);
-
                     // enqueue it for processing
                     _commandQueue.Enqueue(transaction);
 
@@ -69,20 +111,23 @@ namespace Veldy.Net.CommandProcessor
                 }
 
                 // wait for the background worker to process the command
-                var signaled = _processedCommandsResetEvent.WaitOne(this.CommandTimeout);
+                var signaled = transaction.ResetEvent.WaitOne(this.CommandTimeout);
                 if (!signaled)
                     throw new TimeoutException();
+
+                // if there was an exception on the background thread, throw it here
+                if (transaction.Exception != null)
+                    throw transaction.Exception;
+
+                return transaction.Response;
             }
             finally
             {
                 lock (_commandLock)
                 {
-                    // TODO
+                    transaction.Dispose();
                 }
             }
-
-            // TODO
-            return null;
         }
 
         /// <summary>
@@ -91,13 +136,13 @@ namespace Veldy.Net.CommandProcessor
         /// <param name="command">The command.</param>
         public void SendCommand(TCommand command)
         {
+            // create the transaction
+            var transaction = new CommandTransaction<TIdentifier, TStore, TCommand>(command);
+
             try
             {
                 lock (_commandLock)
                 {
-                    // create the transaction
-                    var transaction = new CommandTransaction<TIdentifier, TStore, TCommand>(command);
-
                     // enqueue it for processing
                     _commandQueue.Enqueue(transaction);
 
@@ -105,19 +150,21 @@ namespace Veldy.Net.CommandProcessor
                     _processCommandsResetEvent.Set();
                 }
 
-                var signaled = _processedCommandsResetEvent.WaitOne(this.CommandTimeout);
+                var signaled = transaction.ResetEvent.WaitOne(this.CommandTimeout);
                 if (!signaled)
                     throw new TimeoutException();
+
+                // if there was an exception on the background thread, throw it here
+                if (transaction.Exception != null)
+                    throw transaction.Exception;
             }
             finally
             {
                 lock (_commandLock)
                 {
-                    
+                    transaction.Dispose();
                 }
             }
-
-            // TODO
         }
 
         /// <summary>
@@ -158,7 +205,41 @@ namespace Veldy.Net.CommandProcessor
             {
                 _processCommandsResetEvent.WaitOne(this.CommandWait);
 
-                // TODO
+                ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>> transaction = null;
+
+                lock (_commandLock)
+                {
+                    if (_commandQueue.Any())
+                        transaction = _commandQueue.Dequeue();
+                }
+
+                // process the transaction
+                if (transaction != null)
+                {
+                    try
+                    {
+                        var commandStore = transaction.Command.Store;
+                        if (transaction.HasResponse)
+                        {
+                            var commandWithResponseTransaction = ((ICommandWithResponseTransaction
+                                <TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore, TResponse>,
+                                    TResponse>) transaction);
+
+                            var responseStore = PushCommandWithResponse(commandStore, commandWithResponseTransaction.CommandWithResponse.ResponseLength);
+                            commandWithResponseTransaction.SetResponseStore(responseStore);
+                        }
+                        else
+                        {
+                            PushCommandWithNoResponse(commandStore);
+                        }
+
+                        transaction.SetInvactive();
+                    }
+                    catch (Exception e)
+                    {
+                        transaction.SetException(e);
+                    }
+                }
             }
         }
     }

@@ -13,5 +13,13 @@ namespace Veldy.Net.CommandProcessor
         /// <param name="store">The store.</param>
         /// <returns></returns>
         TResponse CreateResponse(TStore store);
+
+        /// <summary>
+        /// Gets the length of the response.
+        /// </summary>
+        /// <value>
+        /// The length of the response.
+        /// </value>
+        int ResponseLength { get; }
     }
 }

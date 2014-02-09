@@ -2,11 +2,11 @@
 
 namespace Veldy.Net.CommandProcessor
 {
-	public interface ICommandProcessor<in TIdentifier, TStore, in TCommand, in TCommandResponse, in TResponse>
+	public interface ICommandProcessor<in TIdentifier, TStore, in TCommand, in TCommandWithResponse, in TResponse>
 		where TIdentifier : struct, IConvertible
         where TStore : class
         where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
-        where TCommandResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>  
+        where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>  
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 	{
         /// <summary>
@@ -30,14 +30,17 @@ namespace Veldy.Net.CommandProcessor
         /// </value>
         bool IsProcessingMessages { get; }
 
-        /// <summary>
-        /// Sends a command with a response.
-        /// </summary>
-        /// <typeparam name="TRsp"></typeparam>
-        /// <param name="command"></param>
-        /// <returns></returns>
-	    TRsp SendCommand<TRsp>(TCommandResponse command)
-	        where TRsp : class, TResponse, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>;
+	    /// <summary>
+	    /// Sends the command.
+	    /// </summary>
+	    /// <typeparam name="TCmd">The type of the command.</typeparam>
+	    /// <typeparam name="TRsp">The type of the RSP.</typeparam>
+	    /// <param name="command">The command.</param>
+	    /// <returns></returns>
+	    TRsp SendCommand<TCmd, TRsp>(TCmd command)
+	        where TCmd : class, TCommandWithResponse, ICommandWithResponse<TIdentifier, TStore, TRsp>,
+	            ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
+	        where TRsp : class, TResponse, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new();
 
         /// <summary>
         /// Sends the command without a response.

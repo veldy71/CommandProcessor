@@ -1,8 +1,9 @@
 ﻿using System;
+using System.Threading;
 
 namespace Veldy.Net.CommandProcessor
 {
-    interface ICommandTransaction<TIdentifier, TStore, out TCommand>
+    interface ICommandTransaction<TIdentifier, TStore, out TCommand> : IDisposable
         where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore> 
         where TIdentifier : struct, IConvertible
         where TStore : class
@@ -24,6 +25,14 @@ namespace Veldy.Net.CommandProcessor
         bool IsActive { get; }
 
         /// <summary>
+        /// Gets the reset event.
+        /// </summary>
+        /// <value>
+        /// The reset event.
+        /// </value>
+        ManualResetEvent ResetEvent { get; }
+
+        /// <summary>
         /// Gets the exception.
         /// </summary>
         /// <value>
@@ -41,5 +50,13 @@ namespace Veldy.Net.CommandProcessor
         /// </summary>
         /// <param name="exception">The exception.</param>
         void SetException(Exception exception);
+
+        /// <summary>
+        /// Gets a value indicating whether [has response].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [has response]; otherwise, <c>false</c>.
+        /// </value>
+        bool HasResponse { get; }
     }
 }

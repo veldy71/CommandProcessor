@@ -37,6 +37,17 @@ namespace Veldy.Net.CommandProcessor
         }
 
         /// <summary>
+        /// Gets a value indicating whether [has response].
+        /// </summary>
+        /// <value>
+        ///   <c>true</c> if [has response]; otherwise, <c>false</c>.
+        /// </value>
+        public override bool HasResponse
+        {
+            get { return true; }
+        }
+
+        /// <summary>
         /// Sets the response store.
         /// </summary>
         /// <param name="store">The store.</param>
