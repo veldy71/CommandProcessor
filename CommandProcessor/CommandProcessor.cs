@@ -13,28 +13,6 @@ namespace Veldy.Net.CommandProcessor
         where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>  
         where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
     {
-        /// <summary>
-        /// Setups the push command functions.
-        /// </summary>
-        /// <param name="pushCommandWithNoResponse">The push command with no response.</param>
-        /// <param name="pushCommandWithResponse">The push command with response.</param>
-        /// <exception cref="System.ArgumentNullException">
-        /// pushCommandWithNoResponse
-        /// or
-        /// pushCommandWithResponse
-        /// </exception>
-        protected void SetupPushCommandFunctions(Action<TStore> pushCommandWithNoResponse, Func<TStore, int, TStore> pushCommandWithResponse)
-        {
-            if (pushCommandWithNoResponse == null)
-                throw new ArgumentNullException("pushCommandWithNoResponse");
-
-            if (pushCommandWithResponse == null)
-                throw new ArgumentNullException("pushCommandWithResponse");
-
-            PushCommandWithNoResponse = pushCommandWithNoResponse;
-            PushCommandWithResponse = pushCommandWithResponse;
-        }
-
         private bool _isProcessingCommands = false;
         private Thread _commandProcessingThread = null;
         private readonly AutoResetEvent _processCommandsResetEvent = new AutoResetEvent(false);
@@ -82,6 +60,27 @@ namespace Veldy.Net.CommandProcessor
         /// </value>
         public bool IsProcessingMessages { get { return _isProcessingCommands; } }
 
+        /// <summary>
+        /// Setups the push command functions.
+        /// </summary>
+        /// <param name="pushCommandWithNoResponse">The push command with no response.</param>
+        /// <param name="pushCommandWithResponse">The push command with response.</param>
+        /// <exception cref="System.ArgumentNullException">
+        /// pushCommandWithNoResponse
+        /// or
+        /// pushCommandWithResponse
+        /// </exception>
+        protected void SetupPushCommandFunctions(Action<TStore> pushCommandWithNoResponse, Func<TStore, int, TStore> pushCommandWithResponse)
+        {
+            if (pushCommandWithNoResponse == null)
+                throw new ArgumentNullException("pushCommandWithNoResponse");
+
+            if (pushCommandWithResponse == null)
+                throw new ArgumentNullException("pushCommandWithResponse");
+
+            PushCommandWithNoResponse = pushCommandWithNoResponse;
+            PushCommandWithResponse = pushCommandWithResponse;
+        }
 
         /// <summary>
         /// Sends the command with a response.
