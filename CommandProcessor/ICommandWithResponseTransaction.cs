@@ -6,7 +6,7 @@ namespace Veldy.Net.CommandProcessor
         : ICommandTransaction<TIdentifier, TStore, TCommand> 
         where TIdentifier : struct, IConvertible
         where TCommand : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
-        where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
+        where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
         where TStore : class
     {
         /// <summary>

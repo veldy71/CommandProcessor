@@ -11,7 +11,7 @@ namespace Veldy.Net.CommandProcessor
         where TStore : class
         where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore> 
         where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>  
-        where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
+        where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
     {
         private bool _isProcessingCommands = false;
         private Thread _commandProcessingThread = null;

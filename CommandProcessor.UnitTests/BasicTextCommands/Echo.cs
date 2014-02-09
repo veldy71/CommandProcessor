@@ -3,14 +3,14 @@ using System.Text;
 
 namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 {
-    sealed class EchoComand : CommandWithResponse<EchoResponse>
+    sealed class ByteBufferEchoCommand : CommandWithResponse<EchoResponse>
     {
         private byte[] _payload = new byte[0];
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="EchoComand"/> class.
+        /// Initializes a new instance of the <see cref="ByteBufferEchoCommand"/> class.
         /// </summary>
-        public EchoComand() : base(MessageIdentifier.Echo)
+        public ByteBufferEchoCommand() : base(MessageIdentifier.Echo)
         {
         }
 
@@ -21,7 +21,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 	    protected override void PopulateStore(ref string store)
 	    {
 		    var sb = new StringBuilder();
-		    sb.Append(store).Append(this.Delimeter).Append(Convert.ToBase64String(this.Payload));
+			sb.Append(store).Append(this.Delimeter).Append(Convert.ToBase64String(this.Payload));
 
 		    store = sb.ToString();
 	    }
@@ -66,7 +66,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
         /// <value>
         /// The payload.
         /// </value>
-        public byte[] Payload
+		public byte[] Payload
         {
             get { return StoreParts.Length > 1 ?  Convert.FromBase64String(StoreParts[1]) : new byte[0]; }
         }

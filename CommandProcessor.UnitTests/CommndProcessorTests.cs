@@ -1,4 +1,6 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands;
+using Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands;
 
 namespace Veldy.Net.CommandProcessor.UnitTests
 {
@@ -6,9 +8,35 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 	public class CommndProcessorTests
 	{
 		[TestMethod]
-		public void BasicBufferCommandProcessorTest()
+		public void BasicBufferStartStopCommandProcessorTest()
 		{
-			
+			var processor = new BasicBufferCommandProcessor();
+			try
+			{
+				processor.StartCommandProcessing();
+				Assert.IsTrue(processor.IsProcessingMessages);
+			}
+			finally
+			{
+				processor.StopCommandProcessing();
+				Assert.IsFalse(processor.IsProcessingMessages);
+			}
+		}
+
+		[TestMethod]
+		public void BasicTextStartStopCommandProcessorTest()
+		{
+			var processor = new BasicTextCommandProcessor();
+			try
+			{
+				processor.StartCommandProcessing();
+				Assert.IsTrue(processor.IsProcessingMessages);
+			}
+			finally
+			{
+				processor.StopCommandProcessing();
+				Assert.IsFalse(processor.IsProcessingMessages);
+			}
 		}
 	}
 }

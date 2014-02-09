@@ -10,8 +10,7 @@ namespace Veldy.Net.CommandProcessor.Buffer
         where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TResponse>,
             ICommandWithResponse<TIdentifier, byte[], TResponse>, ICommand<TIdentifier, byte[]>,
             IMessage<TIdentifier, byte[]>
-        where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>,
-            new()
+        where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>
     {
         /// <summary>
         /// Commands the processor.

@@ -7,7 +7,7 @@ namespace Veldy.Net.CommandProcessor
         where TStore : class
         where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
         where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>  
-		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
+		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 	{
         /// <summary>
         /// The period of time to wait before checking for work.

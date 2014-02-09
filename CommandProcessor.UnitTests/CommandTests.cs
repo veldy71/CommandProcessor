@@ -36,14 +36,14 @@ namespace Veldy.Net.CommandProcessor.UnitTests
             var commandStore = "ECHO " + Convert.ToBase64String(payload);
             var responseStore = "ECHO " + Convert.ToBase64String(payload);
 
-            var command = new EchoComand {Payload = payload};
+			var command = new ByteBufferEchoCommand { Payload = payload };
             var store = command.Store;
             Assert.IsTrue(store == commandStore, "EchoCommand.Execute() creates invalid store.");
 
             var response = command.CreateResponse(responseStore);
             Assert.IsNotNull(response, "EchoCommand.CreateResponse() did not create a response.");
             Assert.IsInstanceOfType(response, typeof(BasicTextCommands.EchoResponse), "EchoCommand.CreateResponse() did not create a response of type EchoResponse.");
-            Assert.IsTrue(BufferCompare(response.Payload, payload), "EchoResponse.Payload doesn't match payload.");
+			Assert.IsTrue(BufferCompare(response.Payload, payload), "EchoResponse.Payload doesn't match payload.");
         }
 
         /// <summary>
