@@ -40,9 +40,13 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="CommandProcessor.cs" />
+    <Compile Include="CommandWithResponseTransaction.cs" />
+    <Compile Include="CommandTransaction.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="ICommandProcessor.cs" />
+    <Compile Include="ICommandTransaction.cs" />
     <Compile Include="ICommandWithResponse.cs" />
+    <Compile Include="ICommandWithResponseTransaction.cs" />
     <Compile Include="IEvent.cs" />
     <Compile Include="IKey.cs" />
     <Compile Include="IMessage.cs" />
