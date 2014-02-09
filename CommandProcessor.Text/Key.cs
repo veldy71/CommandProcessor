@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
 using System.Globalization;
-using System.Linq;
-using System.Runtime.Remoting.Messaging;
 
 namespace Veldy.Net.CommandProcessor.Text
 {

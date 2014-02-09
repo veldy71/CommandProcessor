@@ -1,8 +1,6 @@
-﻿using Veldy.Net.CommandProcessor.Buffer;
-
-namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
+﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
-    sealed class EchoCommand : CommandWithResponse<MessageIdentifier, EchoResponse> 
+    sealed class EchoCommand : CommandWithResponse<EchoResponse>
     {
         private byte[] _payload = new byte[0];
 
@@ -57,7 +55,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
         }
     }
 
-    sealed class EchoResponse : Response<MessageIdentifier>
+    sealed class EchoResponse : Response
     {
 		/// <summary>
 		/// Initializes a new instance of the <see cref="EchoResponse"/> class.

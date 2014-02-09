@@ -1,10 +1,9 @@
 ﻿using System;
 using System.Text;
-using Veldy.Net.CommandProcessor.Text;
 
 namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 {
-    sealed class EchoComand : CommandWithResponse<MessageIdentifier, EchoResponse>
+    sealed class EchoComand : CommandWithResponse<EchoResponse>
     {
         private byte[] _payload = new byte[0];
 
@@ -51,7 +50,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
         }
     }
 
-    sealed class EchoResponse : Response<MessageIdentifier>
+    sealed class EchoResponse : Response
     {
 		/// <summary>
 		/// Initializes a new instance of the <see cref="EchoResponse"/> class.

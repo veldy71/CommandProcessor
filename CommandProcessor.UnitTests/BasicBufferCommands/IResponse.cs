@@ -1,6 +1,6 @@
-﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicCommands
+﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
-    interface IResponse : IResponse<byte[]>
-    {
-    }
+	interface IResponse : Buffer.IResponse<MessageIdentifier>
+	{
+	}
 }

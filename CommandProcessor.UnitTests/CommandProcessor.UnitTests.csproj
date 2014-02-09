@@ -54,11 +54,24 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="BasicBufferCommands\Command.cs" />
+    <Compile Include="BasicBufferCommands\CommandWithResponse.cs" />
     <Compile Include="BasicBufferCommands\Echo.cs" />
     <Compile Include="BasicBufferCommands\Enums.cs" />
+    <Compile Include="BasicBufferCommands\ICommand.cs" />
+    <Compile Include="BasicBufferCommands\ICommandWithResponse.cs" />
+    <Compile Include="BasicBufferCommands\IResponse.cs" />
+    <Compile Include="BasicBufferCommands\Response.cs" />
+    <Compile Include="BasicTextCommands\Command.cs" />
+    <Compile Include="BasicTextCommands\CommandWithResponse.cs" />
     <Compile Include="BasicTextCommands\Echo.cs" />
     <Compile Include="BasicTextCommands\Enums.cs" />
+    <Compile Include="BasicTextCommands\ICommand.cs" />
+    <Compile Include="BasicTextCommands\ICommandWithResponse.cs" />
+    <Compile Include="BasicTextCommands\IResponse.cs" />
+    <Compile Include="BasicTextCommands\Response.cs" />
     <Compile Include="CommandTests.cs" />
+    <Compile Include="CommndProcessorTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
