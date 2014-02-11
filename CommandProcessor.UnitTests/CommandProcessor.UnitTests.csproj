@@ -55,7 +55,7 @@
   </Choose>
   <ItemGroup>
     <Compile Include="BasicBufferCommands\Command.cs" />
-    <Compile Include="BasicBufferCommands\BasicBufferCommandProcessor.cs" />
+    <Compile Include="BasicBufferCommands\BasicBufferSynchronousCommandProcessor.cs" />
     <Compile Include="BasicBufferCommands\CommandWithResponse.cs" />
     <Compile Include="BasicBufferCommands\Echo.cs" />
     <Compile Include="BasicBufferCommands\Enums.cs" />
@@ -63,7 +63,7 @@
     <Compile Include="BasicBufferCommands\ICommandWithResponse.cs" />
     <Compile Include="BasicBufferCommands\IResponse.cs" />
     <Compile Include="BasicBufferCommands\Response.cs" />
-    <Compile Include="BasicTextCommands\BasicTextCommandProcessor.cs" />
+    <Compile Include="BasicTextCommands\BasicTextSynchronousCommandProcessor.cs" />
     <Compile Include="BasicTextCommands\Command.cs" />
     <Compile Include="BasicTextCommands\CommandWithResponse.cs" />
     <Compile Include="BasicTextCommands\Echo.cs" />

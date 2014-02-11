@@ -51,6 +51,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="EnumTextAttribute.cs" />
+    <Compile Include="SynchronousCommandProcessor.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\CommandProcessor\CommandProcessor.csproj">

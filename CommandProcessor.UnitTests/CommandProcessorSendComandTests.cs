@@ -10,7 +10,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 		{
 			var payload = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
 
-			var processor = new BasicBufferCommands.BasicBufferCommandProcessor();
+			var processor = new BasicBufferCommands.BasicBufferSynchronousCommandProcessor();
 			try
 			{
 				processor.StartCommandProcessing();
@@ -34,7 +34,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 		{
 			var payload = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
 
-			var processor = new BasicTextCommands.BasicTextCommandProcessor();
+			var processor = new BasicTextCommands.BasicTextSynchronousCommandProcessor();
 			try
 			{
 				processor.StartCommandProcessing();

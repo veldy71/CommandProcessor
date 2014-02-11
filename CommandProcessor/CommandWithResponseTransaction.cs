@@ -2,7 +2,7 @@
 
 namespace Veldy.Net.CommandProcessor
 {
-    class CommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>
+	public class CommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>
         : CommandTransaction<TIdentifier, TStore, TCommandWithResponse>, ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>
         where TIdentifier : struct, IConvertible
         where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>

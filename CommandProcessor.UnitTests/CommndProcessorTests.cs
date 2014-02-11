@@ -10,7 +10,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 		[TestMethod]
 		public void BasicBufferStartStopCommandProcessorTest()
 		{
-			var processor = new BasicBufferCommandProcessor();
+			var processor = new BasicBufferSynchronousCommandProcessor();
 			try
 			{
 				processor.StartCommandProcessing();
@@ -26,7 +26,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 		[TestMethod]
 		public void BasicTextStartStopCommandProcessorTest()
 		{
-			var processor = new BasicTextCommandProcessor();
+			var processor = new BasicTextSynchronousCommandProcessor();
 			try
 			{
 				processor.StartCommandProcessing();

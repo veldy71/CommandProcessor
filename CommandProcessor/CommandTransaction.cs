@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace Veldy.Net.CommandProcessor
 {
-    class CommandTransaction<TIdentifier, TStore, TCommand>
+    public class CommandTransaction<TIdentifier, TStore, TCommand>
         : ICommandTransaction<TIdentifier, TStore, TCommand> 
         where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
         where TIdentifier : struct, IConvertible
