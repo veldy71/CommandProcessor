@@ -7,4 +7,4 @@ Command, response, event processing for serial communications.
 Prerequisites
 -------------
 + Visual Studio Professional 2013
-+ WiX 3.8
++ WiX 3.8 http://wixtoolset.org/
