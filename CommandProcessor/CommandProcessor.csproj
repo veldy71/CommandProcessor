@@ -39,6 +39,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AsynchronousCommandProcessor.cs" />
     <Compile Include="CommandProcessor.cs" />
     <Compile Include="CommandWithResponseTransaction.cs" />
     <Compile Include="CommandTransaction.cs" />

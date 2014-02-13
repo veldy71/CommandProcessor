@@ -34,6 +34,8 @@ namespace Veldy.Net.CommandProcessor
         {
             CommandWithResponse = command;
             Response = new TResponse();
+
+			WaitingForResponse = false;
         }
 
         /// <summary>
@@ -64,5 +66,20 @@ namespace Veldy.Net.CommandProcessor
 
             return false;
         }
+
+		/// <summary>
+		/// Gets a value indicating whether [waiting for response].
+		/// </summary>
+		/// <value><c>true</c> if [waiting for response]; otherwise, <c>false</c>.</value>
+		public bool WaitingForResponse { get; private set; }
+
+		/// <summary>
+		/// Sets the waiting for response.
+		/// </summary>
+		public void SetWaitingForResponse()
+		{
+			if (this.Response == null)
+				this.WaitingForResponse = true;
+		}
     }
 }

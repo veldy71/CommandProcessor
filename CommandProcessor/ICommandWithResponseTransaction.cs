@@ -23,5 +23,16 @@ namespace Veldy.Net.CommandProcessor
         /// <param name="store">The store.</param>
         /// <returns></returns>
         bool SetResponseStore(TStore store);
+
+		/// <summary>
+		/// Gets a value indicating whether [waiting for response].
+		/// </summary>
+		/// <value><c>true</c> if [waiting for response]; otherwise, <c>false</c>.</value>
+		bool WaitingForResponse { get; }
+
+		/// <summary>
+		/// Sets the waiting for response.
+		/// </summary>
+	    void SetWaitingForResponse();
     }
 }
