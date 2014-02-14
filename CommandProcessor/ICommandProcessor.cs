@@ -59,11 +59,11 @@ namespace Veldy.Net.CommandProcessor
         /// <summary>
         /// Starts the command processing.
         /// </summary>
-	    void StartCommandProcessing();
+	    void StartProcessing();
 
         /// <summary>
         /// Stops the command processing.
         /// </summary>
-	    void StopCommandProcessing();
+	    void StopProcessing();
 	}
 }

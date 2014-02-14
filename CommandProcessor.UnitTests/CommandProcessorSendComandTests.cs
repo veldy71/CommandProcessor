@@ -19,7 +19,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 			var processor = new BasicBufferCommands.BasicBufferSynchronousCommandProcessor();
 			try
 			{
-				processor.StartCommandProcessing();
+				processor.StartProcessing();
 				Assert.IsTrue(processor.IsProcessingMessages);
 
 				var command = new BasicBufferCommands.EchoCommand { PayLoad = payload };
@@ -30,7 +30,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 			}
 			finally
 			{
-				processor.StopCommandProcessing();
+				processor.StopProcessing();
 				Assert.IsFalse(processor.IsProcessingMessages);
 			}
 		}
@@ -46,7 +46,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 			var processor = new BasicTextCommands.BasicTextSynchronousCommandProcessor();
 			try
 			{
-				processor.StartCommandProcessing();
+				processor.StartProcessing();
 				Assert.IsTrue(processor.IsProcessingMessages);
 
 				var command = new BasicTextCommands.ByteBufferEchoCommand { Payload = payload };
@@ -57,7 +57,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 			}
 			finally
 			{
-				processor.StopCommandProcessing();
+				processor.StopProcessing();
 				Assert.IsFalse(processor.IsProcessingMessages);
 			}
 		}

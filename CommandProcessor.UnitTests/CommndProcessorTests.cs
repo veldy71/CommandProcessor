@@ -19,12 +19,12 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 			var processor = new BasicBufferSynchronousCommandProcessor();
 			try
 			{
-				processor.StartCommandProcessing();
+				processor.StartProcessing();
 				Assert.IsTrue(processor.IsProcessingMessages);
 			}
 			finally
 			{
-				processor.StopCommandProcessing();
+				processor.StopProcessing();
 				Assert.IsFalse(processor.IsProcessingMessages);
 			}
 		}
@@ -38,12 +38,12 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 			var processor = new BasicTextSynchronousCommandProcessor();
 			try
 			{
-				processor.StartCommandProcessing();
+				processor.StartProcessing();
 				Assert.IsTrue(processor.IsProcessingMessages);
 			}
 			finally
 			{
-				processor.StopCommandProcessing();
+				processor.StopProcessing();
 				Assert.IsFalse(processor.IsProcessingMessages);
 			}
 		}

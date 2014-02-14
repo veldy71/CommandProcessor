@@ -157,7 +157,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <summary>
 		/// Starts the command processing.
 		/// </summary>
-		public void StartCommandProcessing()
+		public virtual void StartProcessing()
 		{
 			if (!IsProcessingMessages)
 			{
@@ -170,7 +170,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <summary>
 		/// Stops the command processing.
 		/// </summary>
-		public void StopCommandProcessing()
+		public virtual void StopProcessing()
 		{
 			if (IsProcessingMessages)
 			{

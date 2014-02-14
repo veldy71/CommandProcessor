@@ -19,16 +19,6 @@ namespace Veldy.Net.CommandProcessor
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 	{
 		/// <summary>
-		/// Starts the incoming message processing.
-		/// </summary>
-		void StartIncomingMessageProcessing();
-
-		/// <summary>
-		/// Stops the incoming message processing.
-		/// </summary>
-		void StopIncomingMessageProcessing();
-
-		/// <summary>
 		/// Enqueues the message.
 		/// </summary>
 		/// <param name="store">The store.</param>

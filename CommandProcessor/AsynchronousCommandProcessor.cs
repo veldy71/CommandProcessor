@@ -25,25 +25,30 @@ namespace Veldy.Net.CommandProcessor
 
 		private Thread _messageProcessingThread = null;
 		private readonly object _messageLock = new object();
+		private readonly AutoResetEvent _messageResetEvent = new AutoResetEvent(false);
 
 		private Thread _responseProcessingThread = null;
 		private readonly object _responseLock = new object();
+		private readonly AutoResetEvent _responseResetEvent = new AutoResetEvent(false);
 
 		private Thread _eventProcessingThread = null;
 		private readonly object _eventLock = new object();
+		private readonly AutoResetEvent _eventResetEvent = new AutoResetEvent(false);
 
 		/// <summary>
-		/// Starts the incoming message processing.
+		/// Starts the processing.
 		/// </summary>
-		public void StartIncomingMessageProcessing()
+		public override void StartProcessing()
 		{
-			if (_messageProcessing)
+			base.StartProcessing();
+
+			if (!_messageProcessing)
 			{
 				_messageProcessing = true;
 
 				lock (_messageLock)
 				{
-					_messageProcessingThread = new Thread(ProcessMessages) { Priority = this.MessageThreadPriority, IsBackground = true};
+					_messageProcessingThread = new Thread(ProcessMessages) { Priority = this.MessageThreadPriority, IsBackground = true };
 					_messageProcessingThread.Start();
 				}
 
@@ -62,17 +67,19 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		/// Stops the incoming message processing.
+		/// Stops the processing.
 		/// </summary>
-		public void StopIncomingMessageProcessing()
+		public override void StopProcessing()
 		{
+			base.StopProcessing();
+
 			if (_messageProcessing)
 			{
 				_messageProcessing = false;
 
 				lock (_messageLock)
 				{
-					if (!_messageProcessingThread.Join((int) (this.MessageLatency*1.1)))
+					if (!_messageProcessingThread.Join((int)(this.MessageLatency * 1.1)))
 						_messageProcessingThread.Abort();
 
 					_messageProcessingThread = null;
@@ -113,7 +120,12 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		protected override void ProcessCommands()
 		{
-			// TODO
+			while (_messageProcessing)
+			{
+				ProcessCommandsResetEvent.WaitOne(this.CommandWait);
+
+				// TODO
+			}
 		}
 
 		/// <summary>
@@ -121,7 +133,12 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		private void ProcessMessages()
 		{
-			// TODO
+			while (_messageProcessing)
+			{
+				_messageResetEvent.WaitOne(this.CommandWait);
+
+				// TODO
+			}
 		}
 
 		/// <summary>
@@ -129,7 +146,12 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		private void ProcessEvents()
 		{
-			// TODO
+			while (_messageProcessing)
+			{
+				_eventResetEvent.WaitOne(this.CommandWait);
+
+				// TODO
+			}
 		}
 
 		/// <summary>
@@ -137,7 +159,12 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		private void ProcessResponses()
 		{
-			
+			while (_messageProcessing)
+			{
+				_responseResetEvent.WaitOne(this.CommandWait);
+
+				// TODO
+			}
 		}
 
 		/// <summary>
