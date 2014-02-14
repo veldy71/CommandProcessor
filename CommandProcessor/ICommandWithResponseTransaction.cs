@@ -2,6 +2,13 @@
 
 namespace Veldy.Net.CommandProcessor
 {
+	/// <summary>
+	/// Interface ICommandWithResponseTransaction
+	/// </summary>
+	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
+	/// <typeparam name="TStore">The type of the t store.</typeparam>
+	/// <typeparam name="TCommand">The type of the t command.</typeparam>
+	/// <typeparam name="TResponse">The type of the t response.</typeparam>
     public interface ICommandWithResponseTransaction<TIdentifier, TStore, out TCommand, out TResponse> 
         : ICommandTransaction<TIdentifier, TStore, TCommand> 
         where TIdentifier : struct, IConvertible

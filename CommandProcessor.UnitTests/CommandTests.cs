@@ -7,9 +7,15 @@ using MessageIdentifier = Veldy.Net.CommandProcessor.UnitTests.BasicBufferComman
 
 namespace Veldy.Net.CommandProcessor.UnitTests
 {
+	/// <summary>
+	/// Class CommandTests.
+	/// </summary>
     [TestClass]
     public class CommandTests
     {
+		/// <summary>
+		/// Basics the command buffer test.
+		/// </summary>
         [TestMethod]
         public void BasicCommandBufferTest()
         {
@@ -28,6 +34,9 @@ namespace Veldy.Net.CommandProcessor.UnitTests
             Assert.IsTrue(BufferCompare(response.Payload, payload), "EchoResponse.Payload doesn't match payload.");
         }
 
+		/// <summary>
+		/// Basics the command text test.
+		/// </summary>
         [TestMethod]
         public void BasicCommandTextTest()
         {

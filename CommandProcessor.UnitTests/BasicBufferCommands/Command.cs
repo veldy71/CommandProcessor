@@ -1,5 +1,8 @@
 ﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
+	/// <summary>
+	/// Class Command.
+	/// </summary>
 	abstract class Command : Buffer.Command<MessageIdentifier>, ICommand
 	{
 		/// <summary>

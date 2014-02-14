@@ -1,5 +1,8 @@
 ﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
+	/// <summary>
+	/// Class Response.
+	/// </summary>
 	abstract class Response : Buffer.Response<MessageIdentifier>, IResponse
 	{
 		/// <summary>

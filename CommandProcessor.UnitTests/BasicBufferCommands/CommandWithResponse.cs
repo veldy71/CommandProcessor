@@ -1,5 +1,9 @@
 ﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
+	/// <summary>
+	/// Class CommandWithResponse.
+	/// </summary>
+	/// <typeparam name="TResponse">The type of the t response.</typeparam>
 	abstract class CommandWithResponse<TResponse> : Buffer.CommandWithResponse<MessageIdentifier, TResponse>, ICommandWithResponse<TResponse> 
 		where TResponse : class, IResponse, Buffer.IResponse<MessageIdentifier>, new()
 	{

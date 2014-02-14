@@ -50,9 +50,11 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AsynchronousCommandProcessor.cs" />
     <Compile Include="Command.cs" />
     <Compile Include="CommandProcessor.cs" />
     <Compile Include="CommandWithResponse.cs" />
+    <Compile Include="IAsynchronousCommandProcessor.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="ICommandProcessor.cs" />
     <Compile Include="ICommandWithResponse.cs" />

@@ -2,6 +2,9 @@
 
 namespace Veldy.Net.CommandProcessor.Text
 {
+	/// <summary>
+	/// Class EnumTextAttribute.
+	/// </summary>
 	[AttributeUsage(AttributeTargets.Enum | AttributeTargets.Field, AllowMultiple = true)]
 	public class EnumTextAttribute : Attribute
 	{

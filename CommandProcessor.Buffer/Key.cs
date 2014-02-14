@@ -2,6 +2,10 @@
 
 namespace Veldy.Net.CommandProcessor.Buffer
 {
+	/// <summary>
+	/// Class Key.
+	/// </summary>
+	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
 	class Key<TIdentifier> : IKey<TIdentifier, byte[]>
 		where TIdentifier : struct, IConvertible
     {
@@ -52,6 +56,6 @@ namespace Veldy.Net.CommandProcessor.Buffer
 		/// <value>
 		/// The store.
 		/// </value>
-		public virtual byte[] Store { get { return new[] {Convert.ToByte(this.Identifier)}; } }
+		public byte[] Store { get { return new[] {Convert.ToByte(this.Identifier)}; } }
     }
 }

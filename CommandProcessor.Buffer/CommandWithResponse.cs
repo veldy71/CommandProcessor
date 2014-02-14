@@ -2,6 +2,11 @@
 
 namespace Veldy.Net.CommandProcessor.Buffer
 {
+	/// <summary>
+	/// Class CommandWithResponse.
+	/// </summary>
+	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
+	/// <typeparam name="TResponse">The type of the t response.</typeparam>
     public abstract class CommandWithResponse<TIdentifier, TResponse> : Message<TIdentifier>, ICommandWithResponse<TIdentifier, TResponse>
         where TIdentifier : struct, IConvertible
         where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>, new()

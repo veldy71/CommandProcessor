@@ -4,6 +4,14 @@ using System.Threading;
 
 namespace Veldy.Net.CommandProcessor
 {
+	/// <summary>
+	/// Class CommandProcessor.
+	/// </summary>
+	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
+	/// <typeparam name="TStore">The type of the t store.</typeparam>
+	/// <typeparam name="TCommand">The type of the t command.</typeparam>
+	/// <typeparam name="TCommandWithResponse">The type of the t command with response.</typeparam>
+	/// <typeparam name="TResponse">The type of the t response.</typeparam>
 	public abstract class CommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>
 		: ICommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>
 		where TIdentifier : struct, IConvertible
@@ -53,6 +61,12 @@ namespace Veldy.Net.CommandProcessor
 		{
 			get { return _isProcessingCommands; }
 		}
+
+		/// <summary>
+		/// Gets the communication thread priority.
+		/// </summary>
+		/// <value>The communication thread priority.</value>
+		protected virtual ThreadPriority CommunicationThreadPriority { get { return ThreadPriority.AboveNormal; } }
 
 		/// <summary>
 		/// Sends the command with a response.
@@ -148,7 +162,7 @@ namespace Veldy.Net.CommandProcessor
 			if (!IsProcessingMessages)
 			{
 				_isProcessingCommands = true;
-				_commandProcessingThread = new Thread(ProcessCommands) {Priority = ThreadPriority.AboveNormal};
+				_commandProcessingThread = new Thread(ProcessCommands) {Priority = this.CommunicationThreadPriority, IsBackground = true};
 				_commandProcessingThread.Start();
 			}
 		}
@@ -169,19 +183,9 @@ namespace Veldy.Net.CommandProcessor
 			}
 		}
 
+		/// <summary>
+		/// Processes the commands.
+		/// </summary>
 		protected abstract void ProcessCommands();
-
-		/// <summary>
-		/// Pushes the command with response.
-		/// </summary>
-		/// <param name="commandWithResponse">The command with response.</param>
-		/// <returns></returns>
-		protected abstract TStore PushCommandWithResponse(ICommandWithResponse<TIdentifier, TStore, TResponse> commandWithResponse);
-
-		/// <summary>
-		/// Pushes the command without response.
-		/// </summary>
-		/// <param name="command">The command.</param>
-		protected abstract void PushCommandWithoutResponse(ICommand<TIdentifier, TStore> command);
 	}
 }

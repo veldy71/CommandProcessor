@@ -2,9 +2,15 @@
 
 namespace Veldy.Net.CommandProcessor.UnitTests
 {
+	/// <summary>
+	/// Class CommandProcessorSendCommandTests.
+	/// </summary>
 	[TestClass]
-	public class CommandProcessorSendComandTests
+	public class CommandProcessorSendCommandTests
 	{
+		/// <summary>
+		/// Buffers the echo command test.
+		/// </summary>
 		[TestMethod]
 		public void BufferEchoCommandTest()
 		{
@@ -29,6 +35,9 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 			}
 		}
 
+		/// <summary>
+		/// Texts the echo command test.
+		/// </summary>
 		[TestMethod]
 		public void TextEchoCommandTest()
 		{
@@ -72,7 +81,6 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 				match = lhs[i] == rhs[i];
 
 			return match;
-
 		}
 	}
 }

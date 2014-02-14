@@ -1,5 +1,8 @@
 ﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 {
+	/// <summary>
+	/// Class Command.
+	/// </summary>
 	abstract class Command : Text.Command<MessageIdentifier>, ICommand
 	{
 		/// <summary>

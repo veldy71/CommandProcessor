@@ -43,6 +43,7 @@
     <Compile Include="CommandProcessor.cs" />
     <Compile Include="CommandWithResponseTransaction.cs" />
     <Compile Include="CommandTransaction.cs" />
+    <Compile Include="IAsynchronousCommandProcessor.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="ICommandProcessor.cs" />
     <Compile Include="ICommandTransaction.cs" />

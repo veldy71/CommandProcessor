@@ -1,5 +1,8 @@
 ﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
+	/// <summary>
+	/// Class BasicBufferSynchronousCommandProcessor.
+	/// </summary>
 	class BasicBufferSynchronousCommandProcessor : Buffer.SynchronousCommandProcessor<MessageIdentifier, ICommand, ICommandWithResponse<IResponse>, IResponse>
 	{
 		/// <summary>

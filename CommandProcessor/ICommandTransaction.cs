@@ -3,6 +3,12 @@ using System.Threading;
 
 namespace Veldy.Net.CommandProcessor
 {
+	/// <summary>
+	/// Interface ICommandTransaction
+	/// </summary>
+	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
+	/// <typeparam name="TStore">The type of the t store.</typeparam>
+	/// <typeparam name="TCommand">The type of the t command.</typeparam>
     public interface ICommandTransaction<TIdentifier, TStore, out TCommand> : IDisposable
         where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore> 
         where TIdentifier : struct, IConvertible

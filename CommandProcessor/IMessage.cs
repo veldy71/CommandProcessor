@@ -2,6 +2,11 @@
 
 namespace Veldy.Net.CommandProcessor
 {
+	/// <summary>
+	/// Interface IMessage
+	/// </summary>
+	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
+	/// <typeparam name="TStore">The type of the t store.</typeparam>
     public interface IMessage<out TIdentifier, TStore> 
 		where TIdentifier : struct, IConvertible
         where TStore : class

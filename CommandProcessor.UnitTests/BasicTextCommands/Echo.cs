@@ -3,6 +3,9 @@ using System.Text;
 
 namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 {
+	/// <summary>
+	/// Class ByteBufferEchoCommand. This class cannot be inherited.
+	/// </summary>
     sealed class ByteBufferEchoCommand : CommandWithResponse<EchoResponse>
     {
         private byte[] _payload = new byte[0];
@@ -50,6 +53,9 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
         }
     }
 
+	/// <summary>
+	/// Class EchoResponse. This class cannot be inherited.
+	/// </summary>
     sealed class EchoResponse : Response
     {
 		/// <summary>
