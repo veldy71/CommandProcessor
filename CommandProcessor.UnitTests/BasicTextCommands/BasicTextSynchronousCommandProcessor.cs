@@ -3,27 +3,14 @@
 	/// <summary>
 	/// Class BasicTextSynchronousCommandProcessor.
 	/// </summary>
-	class BasicTextSynchronousCommandProcessor : Text.SynchronousCommandProcessor<MessageIdentifier, ICommand, ICommandWithResponse<IResponse>, IResponse>
+	class BasicTextSynchronousCommandProcessor : Text.SynchronousCommandProcessor<MessageIdentifier, ICommand, ICommandWithResponse<Response>, Response>
 	{
-		/// <summary>
-		/// Sends the command.
-		/// </summary>
-		/// <typeparam name="TResponse">The type of the response.</typeparam>
-		/// <param name="command">The command.</param>
-		/// <returns></returns>
-		public TResponse SendCommand<TResponse>(ICommandWithResponse<TResponse> command)
-			where TResponse : class, IResponse, Text.IResponse<MessageIdentifier>, IResponse<MessageIdentifier, string>,
-				IMessage<MessageIdentifier, string>, new()
-		{
-			return SendCommand<ICommandWithResponse<TResponse>, TResponse>(command);
-		}
-
 		/// <summary>
 		/// Pushes the command with response.
 		/// </summary>
 		/// <param name="commandWithResponse">The command with response.</param>
 		/// <returns></returns>
-		protected override string PushCommandWithResponse(ICommandWithResponse<MessageIdentifier, string, IResponse> commandWithResponse)
+		protected override string PushCommandWithResponse(ICommandWithResponse<MessageIdentifier, string, Response> commandWithResponse)
 		{
 			// for the echo test, just return the same string for store
 			return commandWithResponse.Store;

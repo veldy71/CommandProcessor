@@ -15,7 +15,7 @@ namespace Veldy.Net.CommandProcessor.Buffer
 		where TCommand : class, ICommand<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>
 		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, byte[], TResponse>,
 			ICommand<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>
-		where TResponse : class, IResponse<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>
+		where TResponse : class, IResponse<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>, new()
 	{
 	}
 }

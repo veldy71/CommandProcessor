@@ -1,4 +1,8 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 
 namespace Veldy.Net.CommandProcessor
@@ -16,16 +20,21 @@ namespace Veldy.Net.CommandProcessor
 		IAsynchronousCommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>
 		where TIdentifier : struct, IConvertible
 		where TStore : class
-		where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
+		where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier,TStore> 
 		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>,
-			ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
-		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
+			ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore> 
+		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 	{
 		private bool _messageProcessing = false;
+
+		private readonly
+			List<ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>> _commandsAwaitingResponse 
+								= new List<ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>>();
 
 		private Thread _messageProcessingThread = null;
 		private readonly object _messageLock = new object();
 		private readonly AutoResetEvent _messageResetEvent = new AutoResetEvent(false);
+		private readonly Queue<TStore> _messageQueue = new Queue<TStore> ();
 
 		private Thread _responseProcessingThread = null;
 		private readonly object _responseLock = new object();
@@ -122,11 +131,66 @@ namespace Veldy.Net.CommandProcessor
 		{
 			while (_messageProcessing)
 			{
-				ProcessCommandsResetEvent.WaitOne(this.CommandWait);
+				_ProcessCommandsResetEvent.WaitOne(this.CommandWait);
 
-				// TODO
+				ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>> transaction = null;
+
+				lock (_CommandLock)
+				{
+					if (_CommandQueue.Any())
+						transaction = _CommandQueue.Dequeue();
+
+					// clear commands which found a response
+					_commandsAwaitingResponse.RemoveAll(t => !t.WaitingForResponse);
+				}
+
+				// process the transaction
+				if (transaction != null)
+				{
+					try
+					{
+						if (transaction.HasResponse)
+						{
+							var commandWithResponseTransaction = ((ICommandWithResponseTransaction
+								<TIdentifier, TStore, TCommandWithResponse,
+									TResponse>) transaction);
+
+							var success = PushCommandWithResponseAsync(commandWithResponseTransaction.CommandWithResponse);
+							if (success)
+							{
+								commandWithResponseTransaction.SetWaitingForResponse();
+
+								lock (_CommandLock)
+									_commandsAwaitingResponse.Add(commandWithResponseTransaction);
+							}
+						}
+						else
+						{
+							if (PushCommandWithoutResponseAsynchronus(transaction.Command))
+								transaction.SetInvactive();
+						}
+					}
+					catch (Exception e)
+					{
+						transaction.SetException(e);
+					}
+				}
 			}
 		}
+
+		/// <summary>
+		/// Pushes the command without response asynchronus.
+		/// </summary>
+		/// <param name="command">The command.</param>
+		/// <returns>System.Boolean.</returns>
+		protected abstract bool PushCommandWithoutResponseAsynchronus(ICommand<TIdentifier, TStore> command);
+
+		/// <summary>
+		/// Pushes the command with response asynchronous.
+		/// </summary>
+		/// <param name="transaction">The transaction.</param>
+		/// <returns>System.Boolean.</returns>
+		protected abstract bool PushCommandWithResponseAsync(ICommandWithResponse<TIdentifier, TStore, TResponse> transaction);
 
 		/// <summary>
 		/// Processes the messages.
@@ -137,7 +201,33 @@ namespace Veldy.Net.CommandProcessor
 			{
 				_messageResetEvent.WaitOne(this.CommandWait);
 
-				// TODO
+				TStore message = null;
+				lock (_messageLock)
+				{
+					if (_messageQueue.Any())
+						message = _messageQueue.Dequeue();
+				}
+
+				if (message == null)
+					continue;
+
+				var handled = false;
+				var transactionEnumerator = _commandsAwaitingResponse.Where(t => t.WaitingForResponse).GetEnumerator();
+				while(!handled && transactionEnumerator.MoveNext())
+				{
+					var transaction = transactionEnumerator.Current;
+
+					lock (_CommandLock)
+					{
+						if (transaction.SetResponseStore(message))
+							handled = true;
+					}
+				}
+
+				lock (_eventLock)
+				{
+					// TODO -- process unhandled message for event matches
+				}
 			}
 		}
 

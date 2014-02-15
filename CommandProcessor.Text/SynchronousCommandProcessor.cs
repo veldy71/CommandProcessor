@@ -17,7 +17,7 @@ namespace Veldy.Net.CommandProcessor.Text
 		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TResponse>,
 			ICommandWithResponse<TIdentifier, string, TResponse>, ICommand<TIdentifier, string>,
 			IMessage<TIdentifier, string>
-		where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, string>, IMessage<TIdentifier, string>
+		where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, string>, IMessage<TIdentifier, string>, new()
 	{
 		/// <summary>
 		/// Commands the processor.

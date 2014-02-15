@@ -1,17 +1,18 @@
-﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
+﻿using Veldy.Net.CommandProcessor.Text;
+
+namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 {
 	/// <summary>
 	/// Class Response.
 	/// </summary>
-	abstract class Response : Text.Response<MessageIdentifier>, IResponse
+	class Response : Text.Response<MessageIdentifier>, IResponse
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Response"/> class.
+		/// Initializes a new instance of the <see cref="Response" /> class.
 		/// </summary>
-		/// <param name="identifier">The identifier.</param>
-		protected Response(MessageIdentifier identifier)
-			: base(identifier)
+		public Response()
 		{
+			Key = new Key<MessageIdentifier>(MessageIdentifier.Echo);
 		}
 	}
 }

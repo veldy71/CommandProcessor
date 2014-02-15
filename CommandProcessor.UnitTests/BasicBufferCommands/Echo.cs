@@ -1,4 +1,7 @@
-﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
+﻿using System.Diagnostics;
+using Veldy.Net.CommandProcessor.Buffer;
+
+namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
 	/// <summary>
 	/// Class EchoCommand. This class cannot be inherited.
@@ -64,8 +67,8 @@
 		/// Initializes a new instance of the <see cref="EchoResponse"/> class.
 		/// </summary>
 		public EchoResponse()
-			: base(MessageIdentifier.Echo)
 	    {
+			Key = new Key<MessageIdentifier>(MessageIdentifier.Echo);
 	    }
 
 	    /// <summary>

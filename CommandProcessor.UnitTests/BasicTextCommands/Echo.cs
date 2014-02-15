@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using Veldy.Net.CommandProcessor.Text;
 
 namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 {
@@ -61,9 +62,9 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 		/// <summary>
 		/// Initializes a new instance of the <see cref="EchoResponse"/> class.
 		/// </summary>
-		public EchoResponse()
-			: base(MessageIdentifier.Echo)
-	    {
+		public EchoResponse() 
+		{
+			Key = new Key<MessageIdentifier>(MessageIdentifier.Echo);
 	    }
 
 	    /// <summary>

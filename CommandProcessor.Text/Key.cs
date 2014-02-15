@@ -7,7 +7,7 @@ namespace Veldy.Net.CommandProcessor.Text
 	/// Class Key.
 	/// </summary>
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
-	class Key<TIdentifier> : IKey<TIdentifier, string>
+	public class Key<TIdentifier> : IKey<TIdentifier, string>
 		where TIdentifier : struct, IConvertible
 	{
 		/// <summary>

@@ -6,7 +6,7 @@ namespace Veldy.Net.CommandProcessor.Buffer
 	/// Class Key.
 	/// </summary>
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
-	class Key<TIdentifier> : IKey<TIdentifier, byte[]>
+	public class Key<TIdentifier> : IKey<TIdentifier, byte[]>
 		where TIdentifier : struct, IConvertible
     {
         /// <summary>

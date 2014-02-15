@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 namespace Veldy.Net.CommandProcessor
 {
@@ -13,9 +14,35 @@ namespace Veldy.Net.CommandProcessor
         : CommandTransaction<TIdentifier, TStore, TCommandWithResponse>, ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>
         where TIdentifier : struct, IConvertible
         where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
-        where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
-        where TStore : class
-    {
+		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
+		where TStore : class
+	{
+		private bool _waitingForResponse = false;
+		private readonly int _timeout;
+
+		/// <summary>
+		/// Gets the timeout stop watch.
+		/// </summary>
+		/// <value>The timeout stop watch.</value>
+		protected static Stopwatch TimeoutStopWatch { get; private set; }
+
+		/// <summary>
+		/// Sets the timeout stopwatch.
+		/// </summary>
+		/// <param name="stopwatch">The stopwatch.</param>
+		/// <exception cref="System.ArgumentNullException">stopwatch</exception>
+		/// <exception cref="System.ArgumentOutOfRangeException">stopwatch</exception>
+		public static void SetTimeoutStopwatch(Stopwatch stopwatch)
+		{
+			if (stopwatch == null)
+				throw new ArgumentNullException("stopwatch");
+
+			if (stopwatch != null && TimeoutStopWatch != null)
+				throw new ArgumentOutOfRangeException("stopwatch");
+
+			TimeoutStopWatch = stopwatch;
+		}
+
         /// <summary>
         /// Gets the command with response.
         /// </summary>
@@ -32,17 +59,21 @@ namespace Veldy.Net.CommandProcessor
         /// </value>
         public TResponse Response { get; private set; }
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="CommandWithResponseTransaction{TIdentifier, TStore, TCommand, TResponse}"/> class.
-        /// </summary>
-        /// <param name="command">The command.</param>
-        public CommandWithResponseTransaction(TCommandWithResponse command)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CommandWithResponseTransaction{TIdentifier, TStore, TCommand, TResponse}" /> class.
+		/// </summary>
+		/// <param name="command">The command.</param>
+		/// <param name="timeout">The timeout.</param>
+        public CommandWithResponseTransaction(TCommandWithResponse command, int timeout)
             : base(command)
         {
             CommandWithResponse = command;
             Response = new TResponse();
 
-			WaitingForResponse = false;
+			if (timeout < 1)
+				throw new ArgumentOutOfRangeException("timeout");
+
+			_timeout = timeout;
         }
 
         /// <summary>
@@ -68,6 +99,7 @@ namespace Veldy.Net.CommandProcessor
             if (Response.Key.CompareTo(store) == 0)
             {
                 Response.SetStore(store);
+				SetInvactive();
                 return true;
             }
 
@@ -78,7 +110,14 @@ namespace Veldy.Net.CommandProcessor
 		/// Gets a value indicating whether [waiting for response].
 		/// </summary>
 		/// <value><c>true</c> if [waiting for response]; otherwise, <c>false</c>.</value>
-		public bool WaitingForResponse { get; private set; }
+		public bool WaitingForResponse
+		{
+			get
+			{
+				return _waitingForResponse 
+					&& (TimeoutStopWatch.ElapsedMilliseconds - AwaitingResponseSinceTimestamp) < _timeout;
+			}
+		}
 
 		/// <summary>
 		/// Sets the waiting for response.
@@ -86,7 +125,16 @@ namespace Veldy.Net.CommandProcessor
 		public void SetWaitingForResponse()
 		{
 			if (this.Response == null)
-				this.WaitingForResponse = true;
+			{
+				_waitingForResponse = true;
+				AwaitingResponseSinceTimestamp = TimeoutStopWatch.ElapsedMilliseconds;
+			}
 		}
+
+		/// <summary>
+		/// Gets the awaiting response since timestamp.
+		/// </summary>
+		/// <value>The awaiting response since timestamp.</value>
+		public long AwaitingResponseSinceTimestamp { get; private set; }
     }
 }

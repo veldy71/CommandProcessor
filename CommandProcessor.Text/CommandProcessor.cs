@@ -9,7 +9,7 @@ namespace Veldy.Net.CommandProcessor.Text
 	/// <typeparam name="TCommand">The type of the t command.</typeparam>
 	/// <typeparam name="TCommandWithResponse">The type of the t command with response.</typeparam>
 	/// <typeparam name="TResponse">The type of the t response.</typeparam>
-    public abstract class CommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse>
+	public abstract class CommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse>
 		: SynchronousCommandProcessor<TIdentifier, string, TCommand, TCommandWithResponse, TResponse>,
             ICommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse>
         where TIdentifier : struct, IConvertible
@@ -17,10 +17,11 @@ namespace Veldy.Net.CommandProcessor.Text
         where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TResponse>,
             ICommandWithResponse<TIdentifier, string, TResponse>, ICommand<TIdentifier, string>,
             IMessage<TIdentifier, string>
-        where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, string>, IMessage<TIdentifier, string>
-    {
+		where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, string>, IMessage<TIdentifier, string>, new()
+	{
+
 		/// <summary>
-		/// Initializes a new instance of the <see cref="CommandProcessor{TIdentifier, TCommand, TCommandWithResponse, TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="CommandProcessor{TIdentifier, TCommand, TCommandWithResponse, TIResponse, TResponse}"/> class.
 		/// </summary>
 		protected CommandProcessor()
         {

@@ -11,11 +11,10 @@ namespace Veldy.Net.CommandProcessor.Buffer
     {
 	    private int _storeLength = 0;
 
-	    /// <summary>
-	    /// Initializes a new instance of the <see cref="Response{TIdentifier}"/> class.
-	    /// </summary>
-	    /// <param name="identifier">The identifier.</param>
-	    protected Response(TIdentifier identifier) : base(identifier)
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Response{TIdentifier}" /> class.
+		/// </summary>
+	    protected Response() : base(default(TIdentifier))
 	    {
 		    _storeLength = this.Key.Store.Length;
 	    }

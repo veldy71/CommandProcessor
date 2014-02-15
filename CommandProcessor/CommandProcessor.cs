@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Threading;
 
 namespace Veldy.Net.CommandProcessor
@@ -19,15 +20,65 @@ namespace Veldy.Net.CommandProcessor
 		where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>,
 			ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
-		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
+		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 	{
+		private bool _disposed = false;
+		private readonly Stopwatch _timeoutStopwatch = new Stopwatch();
+
 		private bool _isProcessingCommands = false;
 		private Thread _commandProcessingThread = null;
-		protected readonly AutoResetEvent ProcessCommandsResetEvent = new AutoResetEvent(false);
-		protected readonly object CommandLock = new object();
+		protected readonly AutoResetEvent _ProcessCommandsResetEvent = new AutoResetEvent(false);
+		protected readonly object _CommandLock = new object();
 
 		protected readonly Queue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>> _CommandQueue
 			= new Queue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>>();
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}"/> class.
+		/// </summary>
+		protected CommandProcessor()
+		{
+			_timeoutStopwatch.Start();
+			CommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>.SetTimeoutStopwatch(
+				_timeoutStopwatch);
+		}
+
+		/// <summary>
+		/// Finalizes an instance of the <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}"/> class.
+		/// </summary>
+		~CommandProcessor()
+		{
+			Dispose(false);
+		}
+
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
+		public void Dispose()
+		{
+			GC.SuppressFinalize(this);
+			Dispose(true);
+		}
+
+		/// <summary>
+		/// Releases unmanaged and - optionally - managed resources.
+		/// </summary>
+		/// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+		private void Dispose(bool disposing)
+		{
+			if (!_disposed)
+			{
+				if (disposing)
+				{ }
+
+				_timeoutStopwatch.Stop();
+
+				if (_isProcessingCommands)
+					StopProcessing();
+
+				_disposed = true;
+			}
+		}
 
 		/// <summary>
 		/// Gets the command wait time in milliseconds.
@@ -69,32 +120,29 @@ namespace Veldy.Net.CommandProcessor
 		protected virtual ThreadPriority CommunicationThreadPriority { get { return ThreadPriority.AboveNormal; } }
 
 		/// <summary>
-		/// Sends the command with a response.
+		/// Sends the command.
 		/// </summary>
-		/// <typeparam name="TCmd">The type of the command.</typeparam>
-		/// <typeparam name="TRsp">The type of the RSP.</typeparam>
+		/// <typeparam name="TRsp">The type of the t RSP.</typeparam>
 		/// <param name="command">The command.</param>
-		/// <returns></returns>
+		/// <returns>``0.</returns>
 		/// <exception cref="System.TimeoutException"></exception>
-		public TRsp SendCommand<TCmd, TRsp>(TCmd command)
-			where TCmd : class, TCommandWithResponse, ICommandWithResponse<TIdentifier, TStore, TRsp>,
-				ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
-			where TRsp : class, TResponse, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
+		public TRsp SendCommand<TRsp>(ICommandWithResponse<TIdentifier, TStore, TRsp> command)
+			where TRsp : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 		{
 			// create the transaction
 			var transaction =
 				new CommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore, TRsp>, TRsp>(
-					command);
+					command, CommandTimeout);
 
 			try
 			{
-				lock (CommandLock)
+				lock (_CommandLock)
 				{
 					// enqueue it for processing
 					_CommandQueue.Enqueue(transaction);
 
 					// let the processing thread know to do some work
-					ProcessCommandsResetEvent.Set();
+					_ProcessCommandsResetEvent.Set();
 				}
 
 				// wait for the background worker to process the command
@@ -110,7 +158,7 @@ namespace Veldy.Net.CommandProcessor
 			}
 			finally
 			{
-				lock (CommandLock)
+				lock (_CommandLock)
 				{
 					transaction.Dispose();
 				}
@@ -128,13 +176,13 @@ namespace Veldy.Net.CommandProcessor
 
 			try
 			{
-				lock (CommandLock)
+				lock (_CommandLock)
 				{
 					// enqueue it for processing
 					_CommandQueue.Enqueue(transaction);
 
 					// let the processing thread know to do some work
-					ProcessCommandsResetEvent.Set();
+					_ProcessCommandsResetEvent.Set();
 				}
 
 				var signaled = transaction.ResetEvent.WaitOne(this.CommandTimeout);
@@ -147,7 +195,7 @@ namespace Veldy.Net.CommandProcessor
 			}
 			finally
 			{
-				lock (CommandLock)
+				lock (_CommandLock)
 				{
 					transaction.Dispose();
 				}

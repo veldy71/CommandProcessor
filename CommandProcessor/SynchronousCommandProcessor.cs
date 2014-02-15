@@ -18,7 +18,7 @@ namespace Veldy.Net.CommandProcessor
 		where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>,
 			ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
-		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
+		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 	{
 		/// <summary>
 		/// Processes the commands.
@@ -27,11 +27,11 @@ namespace Veldy.Net.CommandProcessor
 		{
 			while (this.IsProcessingMessages)
 			{
-				ProcessCommandsResetEvent.WaitOne(this.CommandWait);
+				_ProcessCommandsResetEvent.WaitOne(this.CommandWait);
 
 				ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>> transaction = null;
 
-				lock (CommandLock)
+				lock (_CommandLock)
 				{
 					if (_CommandQueue.Any())
 						transaction = _CommandQueue.Dequeue();

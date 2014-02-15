@@ -10,7 +10,7 @@ namespace Veldy.Net.CommandProcessor
 	/// <typeparam name="TCommand">The type of the t command.</typeparam>
 	/// <typeparam name="TCommandWithResponse">The type of the t command with response.</typeparam>
 	/// <typeparam name="TResponse">The type of the t response.</typeparam>
-	public interface ICommandProcessor<in TIdentifier, TStore, in TCommand, in TCommandWithResponse, in TResponse>
+	public interface ICommandProcessor<in TIdentifier, TStore, in TCommand, in TCommandWithResponse, in TResponse> : IDisposable
 		where TIdentifier : struct, IConvertible
         where TStore : class
         where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
@@ -38,17 +38,14 @@ namespace Veldy.Net.CommandProcessor
         /// </value>
         bool IsProcessingMessages { get; }
 
-	    /// <summary>
-	    /// Sends the command.
-	    /// </summary>
-	    /// <typeparam name="TCmd">The type of the command.</typeparam>
-	    /// <typeparam name="TRsp">The type of the RSP.</typeparam>
-	    /// <param name="command">The command.</param>
-	    /// <returns></returns>
-	    TRsp SendCommand<TCmd, TRsp>(TCmd command)
-	        where TCmd : class, TCommandWithResponse, ICommandWithResponse<TIdentifier, TStore, TRsp>,
-	            ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
-	        where TRsp : class, TResponse, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new();
+		/// <summary>
+		/// Sends the command.
+		/// </summary>
+		/// <typeparam name="TRsp">The type of the t RSP.</typeparam>
+		/// <param name="command">The command.</param>
+		/// <returns>``0.</returns>
+		TRsp SendCommand<TRsp>(ICommandWithResponse<TIdentifier, TStore, TRsp> command)
+			where TRsp : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new();
 
         /// <summary>
         /// Sends the command without a response.
