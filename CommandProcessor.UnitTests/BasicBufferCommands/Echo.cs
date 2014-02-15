@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using Veldy.Net.CommandProcessor.Buffer;
+﻿using Veldy.Net.CommandProcessor.Buffer;
 
 namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {

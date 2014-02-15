@@ -6,7 +6,7 @@ namespace Veldy.Net.CommandProcessor.Buffer
 	/// Class Key.
 	/// </summary>
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
-	public class Key<TIdentifier> : IKey<TIdentifier, byte[]>
+	public class Key<TIdentifier> : Key<TIdentifier, byte[]>
 		where TIdentifier : struct, IConvertible
     {
         /// <summary>
@@ -15,9 +15,8 @@ namespace Veldy.Net.CommandProcessor.Buffer
         /// <param name="identifier">The target.</param>
         /// <exception cref="System.ArgumentNullException">target</exception>
 		public Key(TIdentifier identifier)
-        {
-            Identifier = identifier;
-        }
+			: base(identifier)
+        { }
 
         /// <summary>
         /// Compares the current object with another object of the same type.
@@ -26,7 +25,7 @@ namespace Veldy.Net.CommandProcessor.Buffer
         /// <returns>
         /// A value that indicates the relative order of the objects being compared. The return value has the following meanings: Value Meaning Less than zero This object is less than the <paramref name="other" /> parameter.Zero This object is equal to <paramref name="other" />. Greater than zero This object is greater than <paramref name="other" />.
         /// </returns>
-        public int CompareTo(byte[] other)
+        public override int CompareTo(byte[] other)
         {
 	        if (other == null)
 		        return int.MaxValue;
@@ -42,20 +41,12 @@ namespace Veldy.Net.CommandProcessor.Buffer
 	        return v;
         }
 
-        /// <summary>
-        /// Gets the target.
-        /// </summary>
-        /// <value>
-        /// The target.
-        /// </value>
-        public TIdentifier Identifier { get; private set; }
-
 		/// <summary>
 		/// Gets the store.
 		/// </summary>
 		/// <value>
 		/// The store.
 		/// </value>
-		public byte[] Store { get { return new[] {Convert.ToByte(this.Identifier)}; } }
+		public override byte[] Store { get { return new[] {Convert.ToByte(this.Identifier)}; } }
     }
 }

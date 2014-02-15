@@ -43,6 +43,10 @@
     <Compile Include="CommandProcessor.cs" />
     <Compile Include="CommandWithResponseTransaction.cs" />
     <Compile Include="CommandTransaction.cs" />
+    <Compile Include="Event.cs" />
+    <Compile Include="EventActionArgs.cs" />
+    <Compile Include="EventEventArgs.cs" />
+    <Compile Include="EventDelegate.cs" />
     <Compile Include="IAsynchronousCommandProcessor.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="ICommandProcessor.cs" />
@@ -50,9 +54,11 @@
     <Compile Include="ICommandWithResponse.cs" />
     <Compile Include="ICommandWithResponseTransaction.cs" />
     <Compile Include="IEvent.cs" />
+    <Compile Include="IEventDelegate.cs" />
     <Compile Include="IKey.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IResponse.cs" />
+    <Compile Include="Key.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SynchronousCommandProcessor.cs" />
   </ItemGroup>
