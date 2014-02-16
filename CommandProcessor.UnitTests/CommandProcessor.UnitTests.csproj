@@ -54,6 +54,17 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AsyncBuffer\Command.cs" />
+    <Compile Include="AsyncBuffer\CommandWithResponse.cs" />
+    <Compile Include="AsyncBuffer\Echo.cs" />
+    <Compile Include="AsyncBuffer\Enums.cs" />
+    <Compile Include="AsyncBuffer\Event.cs" />
+    <Compile Include="AsyncBuffer\IAsynchronousCommandProcessor.cs" />
+    <Compile Include="AsyncBuffer\ICommand.cs" />
+    <Compile Include="AsyncBuffer\ICommandWithResponse.cs" />
+    <Compile Include="AsyncBuffer\IEvent.cs" />
+    <Compile Include="AsyncBuffer\IResponse.cs" />
+    <Compile Include="AsyncBuffer\Response.cs" />
     <Compile Include="BasicBufferCommands\Command.cs" />
     <Compile Include="BasicBufferCommands\BasicBufferSynchronousCommandProcessor.cs" />
     <Compile Include="BasicBufferCommands\CommandWithResponse.cs" />
@@ -91,7 +102,9 @@
       <Name>CommandProcessor</Name>
     </ProjectReference>
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Folder Include="AsyncText\" />
+  </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
       <ItemGroup>
