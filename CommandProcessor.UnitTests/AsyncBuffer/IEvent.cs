@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Interface IEvent
 	/// </summary>
-	interface IEvent : Buffer.IEvent<MessageIdentifier>
+	interface IEvent : Buffer.IEvent<Identifier>, IMessage
 	{
 	}
 }

@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Interface ICommand
 	/// </summary>
-	interface ICommand : Buffer.ICommand<MessageIdentifier>
+	interface ICommand : Buffer.ICommand<Identifier>, IMessage
 	{
 	} 
 }

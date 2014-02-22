@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
+/// <summary>
+/// The CommandProcessor namespace.
+/// </summary>
 namespace Veldy.Net.CommandProcessor
 {
 	/// <summary>
@@ -22,19 +25,40 @@ namespace Veldy.Net.CommandProcessor
 			ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 	{
+		/// <summary>
+		/// The _disposed
+		/// </summary>
 		private bool _disposed = false;
+		/// <summary>
+		/// The _timeout stopwatch
+		/// </summary>
 		private readonly Stopwatch _timeoutStopwatch = new Stopwatch();
 
+		/// <summary>
+		/// The _is processing commands
+		/// </summary>
 		private bool _isProcessingCommands = false;
+		/// <summary>
+		/// The _command processing thread
+		/// </summary>
 		private Thread _commandProcessingThread = null;
+		/// <summary>
+		/// The _ process commands reset event
+		/// </summary>
 		protected readonly AutoResetEvent _ProcessCommandsResetEvent = new AutoResetEvent(false);
+		/// <summary>
+		/// The _ command lock
+		/// </summary>
 		protected readonly object _CommandLock = new object();
 
+		/// <summary>
+		/// The _ command queue
+		/// </summary>
 		protected readonly Queue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>> _CommandQueue
 			= new Queue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>>();
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}"/> class.
+		/// Initializes a new instance of the <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}" /> class.
 		/// </summary>
 		protected CommandProcessor()
 		{
@@ -44,7 +68,7 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		/// Finalizes an instance of the <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}"/> class.
+		/// Finalizes an instance of the <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}" /> class.
 		/// </summary>
 		~CommandProcessor()
 		{
@@ -83,9 +107,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <summary>
 		/// Gets the command wait time in milliseconds.
 		/// </summary>
-		/// <value>
-		/// The command wait.
-		/// </value>
+		/// <value>The command wait.</value>
 		public virtual int CommandWait
 		{
 			get { return 100; }
@@ -94,9 +116,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <summary>
 		/// Gets the command timeout.
 		/// </summary>
-		/// <value>
-		/// The command timeout.
-		/// </value>
+		/// <value>The command timeout.</value>
 		public virtual int CommandTimeout
 		{
 			get { return 10000; }
@@ -105,9 +125,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <summary>
 		/// Gets a value indicating whether [is processing messages].
 		/// </summary>
-		/// <value>
-		/// <c>true</c> if [is processing messages]; otherwise, <c>false</c>.
-		/// </value>
+		/// <value><c>true</c> if [is processing messages]; otherwise, <c>false</c>.</value>
 		public bool IsProcessingMessages
 		{
 			get { return _isProcessingCommands; }
@@ -126,7 +144,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <param name="command">The command.</param>
 		/// <returns>``0.</returns>
 		/// <exception cref="System.TimeoutException"></exception>
-		public TRsp SendCommand<TRsp>(ICommandWithResponse<TIdentifier, TStore, TRsp> command)
+		public TRsp SendCommandWithResponse<TRsp>(ICommandWithResponse<TIdentifier, TStore, TRsp> command)
 			where TRsp : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 		{
 			// create the transaction
@@ -169,6 +187,7 @@ namespace Veldy.Net.CommandProcessor
 		/// Sends the command without a response.
 		/// </summary>
 		/// <param name="command">The command.</param>
+		/// <exception cref="System.TimeoutException"></exception>
 		public void SendCommand(TCommand command)
 		{
 			// create the transaction

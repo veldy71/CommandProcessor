@@ -14,10 +14,9 @@ namespace Veldy.Net.CommandProcessor.Buffer
 		: AsynchronousCommandProcessor<TIdentifier, byte[], TCommand, TCommandWithResponse, TResponse, TEvent>,
 		IAsynchronousCommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse, TEvent>
 		where TIdentifier : struct, IConvertible
-		where TCommand : class, ICommandWithResponse<TIdentifier, byte[], TResponse> 
+		where TCommand : class, ICommand<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]> 
 		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, byte[], TResponse>,
 			ICommand<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>
-		where TResponse : class, IResponse<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>, new()
-		where TEvent : class, IEvent<TIdentifier>, IEvent<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>, new()
+		where TResponse : class, IResponse<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>, new() where TEvent : class, IEvent<TIdentifier>, IEvent<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>, new()
 	{ }
 }

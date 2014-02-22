@@ -9,11 +9,11 @@ namespace Veldy.Net.CommandProcessor.Buffer
 	public class Key<TIdentifier> : Key<TIdentifier, byte[]>
 		where TIdentifier : struct, IConvertible
     {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="Key{TTarget}"/> class.
-        /// </summary>
-        /// <param name="identifier">The target.</param>
-        /// <exception cref="System.ArgumentNullException">target</exception>
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Key{TTarget}" /> class.
+		/// </summary>
+		/// <param name="identifier">The target.</param>
+		/// <exception cref="System.ArgumentNullException">target</exception>
 		public Key(TIdentifier identifier)
 			: base(identifier)
         { }

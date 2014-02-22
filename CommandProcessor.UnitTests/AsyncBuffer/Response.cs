@@ -3,7 +3,12 @@
 	/// <summary>
 	/// Class Response.
 	/// </summary>
-	abstract class Response : Buffer.Response<MessageIdentifier>, IResponse
+	class Response : Buffer.Response<Identifier>, IResponse
 	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="Response"/> class.
+		/// </summary>
+		public Response()
+		{ }
 	}
 }

@@ -6,8 +6,8 @@ namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 	/// Interface ICommandWithResponse
 	/// </summary>
 	/// <typeparam name="TResponse">The type of the t response.</typeparam>
-	interface ICommandWithResponse<out TResponse> : Buffer.ICommandWithResponse<MessageIdentifier, TResponse>
-		where TResponse : class, IResponse, IResponse<MessageIdentifier>, IResponse<MessageIdentifier, byte[]>, IMessage<MessageIdentifier, byte[]>
+	interface ICommandWithResponse<out TResponse> : Buffer.ICommandWithResponse<Identifier, TResponse>, ICommand 
+		where TResponse : class, IResponse, IResponse<Identifier>, IResponse<Identifier, byte[]>, IMessage, IMessage<Identifier, byte[]>
 	{
 	}
 }

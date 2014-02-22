@@ -44,7 +44,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <typeparam name="TRsp">The type of the t RSP.</typeparam>
 		/// <param name="command">The command.</param>
 		/// <returns>``0.</returns>
-		TRsp SendCommand<TRsp>(ICommandWithResponse<TIdentifier, TStore, TRsp> command)
+		TRsp SendCommandWithResponse<TRsp>(ICommandWithResponse<TIdentifier, TStore, TRsp> command)
 			where TRsp : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new();
 
         /// <summary>

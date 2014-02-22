@@ -23,7 +23,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 				Assert.IsTrue(processor.IsProcessingMessages);
 
 				var command = new BasicBufferCommands.EchoCommand { PayLoad = payload };
-				var response = processor.SendCommand(command);
+				var response = processor.SendCommandWithResponse(command);
 				Assert.IsNotNull(response, "SendCommand did not return a response.");
 				Assert.IsInstanceOfType(response, typeof(BasicBufferCommands.EchoResponse));
 				Assert.IsTrue(BufferCompare(response.Payload, payload), "Response payload did not match the command payload.");
@@ -50,7 +50,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 				Assert.IsTrue(processor.IsProcessingMessages);
 
 				var command = new BasicTextCommands.ByteBufferEchoCommand { Payload = payload };
-				var response = processor.SendCommand(command);
+				var response = processor.SendCommandWithResponse(command);
 				Assert.IsNotNull(response, "SendCommand did not return a response.");
 				Assert.IsInstanceOfType(response, typeof(BasicTextCommands.EchoResponse));
 				Assert.IsTrue(BufferCompare(response.Payload, payload), "Response payload did not match the command payload.");

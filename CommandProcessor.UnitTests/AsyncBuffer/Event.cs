@@ -3,14 +3,13 @@
 	/// <summary>
 	/// Class Event.
 	/// </summary>
-	abstract class Event : Buffer.Event<MessageIdentifier>, IEvent
+	class Event : Buffer.Event<Identifier>, IEvent
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Event"/> class.
+		/// Initializes a new instance of the <see cref="Event" /> class.
 		/// </summary>
-		/// <param name="identifier">The identifier.</param>
-		protected Event(MessageIdentifier identifier) 
-			: base(identifier)
+		public Event()
+			: base(default(Identifier))
 		{
 		}
 	}

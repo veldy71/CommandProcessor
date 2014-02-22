@@ -13,6 +13,7 @@ namespace Veldy.Net.CommandProcessor
 	/// <typeparam name="TCommand">The type of the t command.</typeparam>
 	/// <typeparam name="TCommandWithResponse">The type of the t command with response.</typeparam>
 	/// <typeparam name="TResponse">The type of the t response.</typeparam>
+	/// <typeparam name="TEvent">The type of the t event.</typeparam>
 	public abstract class AsynchronousCommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse, TEvent>
 		: CommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>, 
 		IAsynchronousCommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse, TEvent>
@@ -22,27 +23,49 @@ namespace Veldy.Net.CommandProcessor
 		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>,
 			ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore> 
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
-		where TEvent : class, IEvent<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
+		where TEvent : class, IEvent<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 	{
+		/// <summary>
+		/// The _message processing
+		/// </summary>
 		private bool _messageProcessing = false;
 
+		/// <summary>
+		/// The _commands awaiting response
+		/// </summary>
 		private readonly
 			List<ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>> _commandsAwaitingResponse 
 								= new List<ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>>();
 
+		/// <summary>
+		/// The _message processing thread
+		/// </summary>
 		private Thread _messageProcessingThread = null;
+		/// <summary>
+		/// The _message lock
+		/// </summary>
 		private readonly object _messageLock = new object();
+		/// <summary>
+		/// The _message reset event
+		/// </summary>
 		private readonly AutoResetEvent _messageResetEvent = new AutoResetEvent(false);
+		/// <summary>
+		/// The _message queue
+		/// </summary>
 		private readonly Queue<TStore> _messageQueue = new Queue<TStore> ();
 
+		/// <summary>
+		/// The _event processing thread
+		/// </summary>
 		private Thread _eventProcessingThread = null;
+		/// <summary>
+		/// The _event lock
+		/// </summary>
 		private readonly object _eventLock = new object();
+		/// <summary>
+		/// The _event reset event
+		/// </summary>
 		private readonly AutoResetEvent _eventResetEvent = new AutoResetEvent(false);
-		private readonly List<IEventDelegate<TEvent, TIdentifier, TStore>> _eventDelegates 
-			= new List<IEventDelegate<TEvent, TIdentifier, TStore>>();
-
-		private readonly Queue<EventActionArgs<TIdentifier, TStore, TEvent>> _eventFireQueue =
-			new Queue<EventActionArgs<TIdentifier, TStore, TEvent>>();
 
 		/// <summary>
 		/// Starts the processing.
@@ -120,9 +143,9 @@ namespace Veldy.Net.CommandProcessor
 		/// <summary>
 		/// Pushes the command with response asynchronous.
 		/// </summary>
-		/// <param name="transaction">The transaction.</param>
+		/// <param name="commandWithResponse">The command with response.</param>
 		/// <returns>System.Boolean.</returns>
-		protected abstract bool PushCommandWithResponseAsync(ICommandWithResponse<TIdentifier, TStore, TResponse> transaction);
+		protected abstract bool PushCommandWithResponseAsync(ICommandWithResponse<TIdentifier, TStore, TResponse> commandWithResponse);
 
 		/// <summary>
 		/// Processes the commands.
@@ -224,21 +247,7 @@ namespace Veldy.Net.CommandProcessor
 
 					lock (_eventLock)
 					{
-						foreach (var eventDelegate in _eventDelegates)
-						{
-							var evt = eventDelegate.HandleStore(message);
-							if (evt != null)
-							{
-								handled = true;
-
-								// Delegate this to another thread
-								_eventFireQueue.Enqueue(new EventActionArgs<TIdentifier, TStore, TEvent>(eventDelegate,
-									new EventEventArgs<TIdentifier, TStore, TEvent>(evt)));
-								_eventResetEvent.Set();
-
-								break;
-							}
-						}
+						// TODO -- handle events
 					}
 				} 
 				while (message != null);
@@ -254,26 +263,7 @@ namespace Veldy.Net.CommandProcessor
 			{
 				_eventResetEvent.WaitOne(this.CommandWait);
 
-				EventActionArgs<TIdentifier, TStore, TEvent> item;
-
-				do
-				{
-					item = null;
-
-					lock (_eventLock)
-					{
-						if (_eventFireQueue.Any())
-						{
-							item = _eventFireQueue.Dequeue();
-						}
-					}
-
-					if (item != null)
-					{
-						item.Invoke();
-					}
-
-				} while (item != null);
+				// TODO
 			}
 		}
 
@@ -281,6 +271,7 @@ namespace Veldy.Net.CommandProcessor
 		/// Enqueues the message.
 		/// </summary>
 		/// <param name="store">The store.</param>
+		/// <exception cref="System.ArgumentNullException">store</exception>
 		public void EnqueueMessage(TStore store)
 		{
 			if (store == null)

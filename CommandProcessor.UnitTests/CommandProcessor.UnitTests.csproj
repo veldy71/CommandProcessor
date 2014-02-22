@@ -34,6 +34,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
+  <PropertyGroup />
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Data" />
@@ -54,6 +55,10 @@
     </Otherwise>
   </Choose>
   <ItemGroup>
+    <Compile Include="AsyncBuffer\Identifier.cs" />
+    <Compile Include="AsyncBuffer\IMessage.cs" />
+    <Compile Include="AsynchronousCommandProcessorTest.cs" />
+    <Compile Include="AsyncBuffer\AsynchronousCommandProcessor.cs" />
     <Compile Include="AsyncBuffer\Command.cs" />
     <Compile Include="AsyncBuffer\CommandWithResponse.cs" />
     <Compile Include="AsyncBuffer\Echo.cs" />

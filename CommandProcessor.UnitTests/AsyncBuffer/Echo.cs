@@ -13,7 +13,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 		/// Initializes a new instance of the <see cref="EchoCommand"/> class.
 		/// </summary>
 		public EchoCommand()
-			: base(MessageIdentifier.Echo)
+			: base(new Identifier { MessageIdentifier = MessageIdentifier.Echo, MessageType = MessageType.CommandType})
 		{ }
 
 		/// <summary>
@@ -60,14 +60,14 @@ namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 		}
 	}
 
-	sealed class EchoResponse : Response
+	sealed class EchoResponse : Response, IMessage<Identifier, byte[]>
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="EchoResponse"/> class.
 		/// </summary>
 		public EchoResponse()
 		{
-			Key = new Key<MessageIdentifier>(MessageIdentifier.Echo);
+			Key = new Key<Identifier>(new Identifier { MessageIdentifier = MessageIdentifier.Echo, MessageType = MessageType.ResponseType});
 		}
 
 		/// <summary>
@@ -79,6 +79,20 @@ namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 		public byte[] Payload
 		{
 			get { return GetByteArray(Store, this.Key.Store.Length, BufferLength - 1); }
+		}
+	}
+
+	/// <summary>
+	/// Class EchoEvent.
+	/// </summary>
+	class EchoEvent : Event
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="EchoEvent"/> class.
+		/// </summary>
+		public EchoEvent()
+		{
+			Key = new Key<Identifier>(new Identifier { MessageIdentifier = MessageIdentifier.Echo, MessageType = MessageType.EventType});
 		}
 	}
 }

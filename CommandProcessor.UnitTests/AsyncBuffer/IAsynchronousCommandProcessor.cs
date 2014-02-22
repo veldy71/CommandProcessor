@@ -3,8 +3,8 @@
 	/// <summary>
 	/// Interface IAsynchronousCommandProcessor
 	/// </summary>
-	interface IAsynchronousCommandProcessor 
-		: Buffer.IAsynchronousCommandProcessor<MessageIdentifier, ICommand, ICommandWithResponse<IResponse>, IResponse, IEvent>
+	interface IAsynchronousCommandProcessor
+		: Buffer.IAsynchronousCommandProcessor<Identifier, ICommand, ICommandWithResponse<IResponse>, IResponse, IEvent>
 	{
 	}
 }

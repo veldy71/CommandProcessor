@@ -3,7 +3,7 @@
 	/// <summary>
 	/// Interface IResponse
 	/// </summary>
-	interface IResponse : Buffer.IResponse<MessageIdentifier>
+	interface IResponse : Buffer.IResponse<Identifier>, IMessage
 	{
 	}
 }

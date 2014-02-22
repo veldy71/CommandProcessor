@@ -28,7 +28,7 @@ namespace Veldy.Net.CommandProcessor
 		/// Gets the key.
 		/// </summary>
 		/// <value>The key.</value>
-		public IKey<TIdentifier, TStore> Key { get; private set; }
+		public IKey<TIdentifier, TStore> Key { get; protected set; }
 
 		/// <summary>
 		/// Gets the store.

@@ -3,13 +3,13 @@
 	/// <summary>
 	/// Class Command.
 	/// </summary>
-	abstract class Command : Buffer.Command<MessageIdentifier>, ICommand
+	abstract class Command : Buffer.Command<Identifier>, ICommand
 	{
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Command"/> class.
 		/// </summary>
 		/// <param name="messageId">The message identifier.</param>
-		protected Command(MessageIdentifier messageId) 
+		protected Command(Identifier messageId) 
 			: base(messageId)
 		{
 		}
