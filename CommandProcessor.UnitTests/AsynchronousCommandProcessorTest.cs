@@ -1,4 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Diagnostics;
+using System.Threading;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Veldy.Net.CommandProcessor.UnitTests
 {
@@ -19,14 +21,27 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 			var processor = new AsyncBuffer.AsynchronousCommandProcessor();
 			try
 			{
+				var eventSuccess = false;
+				var resetEvent = new ManualResetEvent(false);
+
 				processor.StartProcessing();
 				Assert.IsTrue(processor.IsProcessingMessages);
+
+				processor.EchoEvent += (sender, args) =>
+				{
+					eventSuccess = true;
+					resetEvent.Set();
+				};
 
 				var command = new AsyncBuffer.EchoCommand { PayLoad = payload };
 				var response = processor.SendCommandWithResponse(command);
 				Assert.IsNotNull(response, "SendCommand did not return a response.");
 				Assert.IsInstanceOfType(response, typeof(AsyncBuffer.EchoResponse));
 				Assert.IsTrue(BufferCompare(response.Payload, payload), "Response payload did not match the command payload.");
+
+				var signaled = resetEvent.WaitOne(10000);
+				Assert.IsTrue(signaled);
+				Assert.IsTrue(eventSuccess);
 			}
 			finally
 			{

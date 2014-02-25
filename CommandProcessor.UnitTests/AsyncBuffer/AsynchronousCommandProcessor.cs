@@ -15,7 +15,31 @@ namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 		/// </summary>
 		public AsynchronousCommandProcessor()
 		{
-			
+			RegisterEventHandler(new Key<Identifier>(new Identifier { MessageIdentifier = MessageIdentifier.Echo, MessageType = MessageType.EventType}), new Action<EchoEvent>(EchoEventHandler));
+		}
+
+		/// <summary>
+		/// The echo event.
+		/// </summary>
+		public event EventHandler<EventEventArgs<Identifier, byte[], EchoEvent>> EchoEvent;
+
+		/// <summary>
+		/// Called when [echo event].
+		/// </summary>
+		/// <param name="e">The e.</param>
+		private void OnEchoEvent(EventEventArgs<Identifier, byte[], EchoEvent> e)
+		{
+			if (EchoEvent != null) 
+				EchoEvent(this, e);
+		}
+
+		/// <summary>
+		/// Echoes the event handler.
+		/// </summary>
+		/// <param name="echoEvent">The echo event.</param>
+		private void EchoEventHandler(EchoEvent echoEvent)
+		{
+			OnEchoEvent(new EventEventArgs<Identifier, byte[], EchoEvent>(echoEvent));
 		}
 
 		/// <summary>

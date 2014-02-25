@@ -186,6 +186,16 @@ namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 		/// <returns>An <see cref="T:System.Object" /> instance of type <paramref name="conversionType" /> whose value is equivalent to the value of this instance.</returns>
 		public object ToType(Type conversionType, IFormatProvider provider)
 		{
+			if (conversionType == typeof (byte[]))
+			{
+				var s = Convert.ToUInt16(this);
+
+				var bytes = new byte[2];
+				bytes[0] = Convert.ToByte((s << 8) & 0xFF);
+				bytes[1] = Convert.ToByte(s & 0xFF);
+
+				return bytes;
+			}
 			return ((IConvertible) ToUInt16(provider)).ToType(conversionType, provider);
 		}
 	}

@@ -47,6 +47,13 @@ namespace Veldy.Net.CommandProcessor.Buffer
 		/// <value>
 		/// The store.
 		/// </value>
-		public override byte[] Store { get { return new[] {Convert.ToByte(this.Identifier)}; } }
+		public override byte[] Store
+		{
+			get
+			{
+				var s = Convert.ToUInt16(Identifier);
+				return BitConverter.GetBytes(s);
+			}
+		}
     }
 }
