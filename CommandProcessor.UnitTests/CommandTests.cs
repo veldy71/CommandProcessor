@@ -1,9 +1,5 @@
 ﻿using System;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands;
-using Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands;
-using EchoResponse = Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands.EchoResponse;
-using MessageIdentifier = Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands.MessageIdentifier;
 
 namespace Veldy.Net.CommandProcessor.UnitTests
 {
@@ -21,16 +17,16 @@ namespace Veldy.Net.CommandProcessor.UnitTests
         {
             var payload = new byte[] {0x01, 0x02, 0x03, 0x04, 0x05};
 
-            var commandStore = new byte[] { (byte)MessageIdentifier.Echo, 0x01, 0x02, 0x03, 0x04, 0x05 };
-            var responseStore = new byte[] { (byte)MessageIdentifier.Echo, 0x01, 0x02, 0x03, 0x04, 0x05 };
+            var commandStore = new byte[] { (byte)BasicBufferCommands.MessageIdentifier.Echo, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
+			var responseStore = new byte[] { (byte)BasicBufferCommands.MessageIdentifier.Echo, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
 
-            var command = new EchoCommand { PayLoad = payload };
+            var command = new BasicBufferCommands.EchoCommand { PayLoad = payload };
             var store = command.Store;
             Assert.IsTrue(BufferCompare(store, commandStore), "EchoCommand.Execute() creates invalid store.");
 
             var response = command.CreateResponse(responseStore);
             Assert.IsNotNull(response, "EchoCommand.CreateResponse() did not create a response.");
-            Assert.IsInstanceOfType(response, typeof(EchoResponse), "EchoCommand.CreateResponse() did not create a response of type EchoResponse.");
+            Assert.IsInstanceOfType(response, typeof(BasicBufferCommands.EchoResponse), "EchoCommand.CreateResponse() did not create a response of type EchoResponse.");
             Assert.IsTrue(BufferCompare(response.Payload, payload), "EchoResponse.Payload doesn't match payload.");
         }
 
@@ -45,7 +41,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
             var commandStore = "ECHO " + Convert.ToBase64String(payload);
             var responseStore = "ECHO " + Convert.ToBase64String(payload);
 
-			var command = new ByteBufferEchoCommand { Payload = payload };
+			var command = new BasicTextCommands.EchoCommand { Payload = payload };
             var store = command.Store;
             Assert.IsTrue(store == commandStore, "EchoCommand.Execute() creates invalid store.");
 

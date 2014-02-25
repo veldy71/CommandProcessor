@@ -7,14 +7,14 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 	/// <summary>
 	/// Class ByteBufferEchoCommand. This class cannot be inherited.
 	/// </summary>
-    sealed class ByteBufferEchoCommand : CommandWithResponse<EchoResponse>
+    sealed class EchoCommand : CommandWithResponse<EchoResponse>
     {
         private byte[] _payload = new byte[0];
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="ByteBufferEchoCommand"/> class.
+        /// Initializes a new instance of the <see cref="EchoCommand"/> class.
         /// </summary>
-        public ByteBufferEchoCommand() : base(MessageIdentifier.Echo)
+        public EchoCommand() : base(MessageIdentifier.Echo)
         {
         }
 

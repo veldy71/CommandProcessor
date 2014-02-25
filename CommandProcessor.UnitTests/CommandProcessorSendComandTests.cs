@@ -14,7 +14,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 		[TestMethod]
 		public void BufferEchoCommandTest()
 		{
-			var payload = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
+			var payload = new byte[] { 0x01, 0x00, 0x01, 0x02, 0x03, 0x04, 0x05 };
 
 			var processor = new BasicBufferCommands.BasicBufferSynchronousCommandProcessor();
 			try
@@ -49,7 +49,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 				processor.StartProcessing();
 				Assert.IsTrue(processor.IsProcessingMessages);
 
-				var command = new BasicTextCommands.ByteBufferEchoCommand { Payload = payload };
+				var command = new BasicTextCommands.EchoCommand { Payload = payload };
 				var response = processor.SendCommandWithResponse(command);
 				Assert.IsNotNull(response, "SendCommand did not return a response.");
 				Assert.IsInstanceOfType(response, typeof(BasicTextCommands.EchoResponse));

@@ -78,7 +78,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
         /// </value>
         public byte[] Payload
         {
-            get { return GetByteArray(Store, this.Key.Store.Length, BufferLength - 1); }
+            get { return GetByteArray(Store, this.Key.Store.Length, BufferLength - 2); }
         }
     }
 }
