@@ -3,14 +3,13 @@
 namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 {
 	/// <summary>
-	/// Enum MessageIdentifier
+	///     Enum MessageIdentifier
 	/// </summary>
-    enum MessageIdentifier
-    {
+	internal enum MessageIdentifier
+	{
 		/// <summary>
-		/// Echo
+		///     Echo
 		/// </summary>
-		[EnumText("ECHO")]
-        Echo
-    }
+		[EnumText("ECHO")] Echo
+	}
 }

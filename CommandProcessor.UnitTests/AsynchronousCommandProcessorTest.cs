@@ -1,27 +1,27 @@
-﻿using System.Diagnostics;
-using System.Threading;
+﻿using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer;
 
 namespace Veldy.Net.CommandProcessor.UnitTests
 {
 	/// <summary>
-	/// Class AsynchronousCommandProcessorTest.
+	///     Class AsynchronousCommandProcessorTest.
 	/// </summary>
 	[TestClass]
 	public class AsynchronousCommandProcessorTest
 	{
 		/// <summary>
-		/// Buffers the test.
+		///     Buffers the test.
 		/// </summary>
 		[TestMethod]
 		public void BufferTest()
 		{
-			var payload = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05 };
+			var payload = new byte[] {0x01, 0x02, 0x03, 0x04, 0x05};
 
-			var processor = new AsyncBuffer.AsynchronousCommandProcessor();
+			var processor = new AsynchronousCommandProcessor();
 			try
 			{
-				var eventSuccess = false;
+				bool eventSuccess = false;
 				var resetEvent = new ManualResetEvent(false);
 
 				processor.StartProcessing();
@@ -33,13 +33,13 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 					resetEvent.Set();
 				};
 
-				var command = new AsyncBuffer.EchoCommand { PayLoad = payload };
-				var response = processor.SendCommandWithResponse(command);
+				var command = new EchoCommand {PayLoad = payload};
+				EchoResponse response = processor.SendCommandWithResponse(command);
 				Assert.IsNotNull(response, "SendCommand did not return a response.");
-				Assert.IsInstanceOfType(response, typeof(AsyncBuffer.EchoResponse));
+				Assert.IsInstanceOfType(response, typeof (EchoResponse));
 				Assert.IsTrue(BufferCompare(response.Payload, payload), "Response payload did not match the command payload.");
 
-				var signaled = resetEvent.WaitOne(10000);
+				bool signaled = resetEvent.WaitOne(10000);
 				Assert.IsTrue(signaled);
 				Assert.IsTrue(eventSuccess);
 			}
@@ -51,16 +51,15 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 		}
 
 		/// <summary>
-		/// Texts the test.
+		///     Texts the test.
 		/// </summary>
 		[TestMethod]
 		public void TextTest()
 		{
-
 		}
 
 		/// <summary>
-		/// Buffers the compare.
+		///     Buffers the compare.
 		/// </summary>
 		/// <param name="lhs">The LHS.</param>
 		/// <param name="rhs">The RHS.</param>
@@ -73,8 +72,8 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 			if (lhs.Length != rhs.Length)
 				return false;
 
-			var match = true;
-			for (var i = 0; match && i < lhs.Length; i++)
+			bool match = true;
+			for (int i = 0; match && i < lhs.Length; i++)
 				match = lhs[i] == rhs[i];
 
 			return match;

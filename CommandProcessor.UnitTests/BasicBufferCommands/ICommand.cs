@@ -1,9 +1,11 @@
-﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
+﻿using Veldy.Net.CommandProcessor.Buffer;
+
+namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
 	/// <summary>
-	/// Interface ICommand
+	///     Interface ICommand
 	/// </summary>
-	interface ICommand : Buffer.ICommand<MessageIdentifier>
+	internal interface ICommand : ICommand<MessageIdentifier>
 	{
 	}
 }

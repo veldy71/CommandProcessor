@@ -1,9 +1,11 @@
-﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
+﻿using Veldy.Net.CommandProcessor.Text;
+
+namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 {
 	/// <summary>
-	/// Interface IResponse
+	///     Interface IResponse
 	/// </summary>
-	interface IResponse : Text.IResponse<MessageIdentifier>
+	internal interface IResponse : IResponse<MessageIdentifier>
 	{
 	}
 }

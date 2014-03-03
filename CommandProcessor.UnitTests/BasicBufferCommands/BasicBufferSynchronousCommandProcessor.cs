@@ -1,23 +1,27 @@
-﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
+﻿using Veldy.Net.CommandProcessor.Buffer;
+
+namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
 	/// <summary>
-	/// Class BasicBufferSynchronousCommandProcessor.
+	///     Class BasicBufferSynchronousCommandProcessor.
 	/// </summary>
-	class BasicBufferSynchronousCommandProcessor : Buffer.SynchronousCommandProcessor<MessageIdentifier, ICommand, ICommandWithResponse<Response>, Response>
+	internal class BasicBufferSynchronousCommandProcessor :
+		SynchronousCommandProcessor<MessageIdentifier, ICommand, ICommandWithResponse<Response>, Response>
 	{
 		/// <summary>
-		/// Pushes the command with response.
+		///     Pushes the command with response.
 		/// </summary>
 		/// <param name="commandWithResponse">The command with response.</param>
 		/// <returns></returns>
-		protected override byte[] PushCommandWithResponse(ICommandWithResponse<MessageIdentifier, byte[], Response> commandWithResponse)
+		protected override byte[] PushCommandWithResponse(
+			ICommandWithResponse<MessageIdentifier, byte[], Response> commandWithResponse)
 		{
 			// for the echo command, just return the same store
 			return commandWithResponse.Store;
 		}
 
 		/// <summary>
-		/// Pushes the command without response.
+		///     Pushes the command without response.
 		/// </summary>
 		/// <param name="command">The command.</param>
 		protected override void PushCommandWithoutResponse(ICommand<MessageIdentifier, byte[]> command)

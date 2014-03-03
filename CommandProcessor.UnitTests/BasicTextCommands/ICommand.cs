@@ -1,9 +1,11 @@
-﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
+﻿using Veldy.Net.CommandProcessor.Text;
+
+namespace Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands
 {
 	/// <summary>
-	/// Interface ICommand
+	///     Interface ICommand
 	/// </summary>
-	interface ICommand : Text.ICommand<MessageIdentifier>
+	internal interface ICommand : ICommand<MessageIdentifier>
 	{
 	}
 }

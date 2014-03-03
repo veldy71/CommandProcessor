@@ -5,7 +5,10 @@
     <IgnoreExtensions>
     </IgnoreExtensions>
     <IgnoreFiles>
+      <IgnoreFile>.\CommandProcessor.Buffer.UnitTests\Command.cs</IgnoreFile>
+      <IgnoreFile>.\CommandProcessor.Buffer.UnitTests\ICommand.cs</IgnoreFile>
       <IgnoreFile>.\CommandProcessor\AsynchronousCommandProcessor.cs</IgnoreFile>
+      <IgnoreFile>.\CommandProcessor\CommandWithResponseTransaction.cs</IgnoreFile>
     </IgnoreFiles>
   </SpellChecker>
 <HelpConfigurations selected="HelpFile">

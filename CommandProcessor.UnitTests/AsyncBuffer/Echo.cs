@@ -3,24 +3,25 @@
 namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 {
 	/// <summary>
-	/// Class EchoCommand. This class cannot be inherited.
+	///     Class EchoCommand. This class cannot be inherited.
 	/// </summary>
-	sealed class EchoCommand : CommandWithResponse<EchoResponse>
+	internal sealed class EchoCommand : CommandWithResponse<EchoResponse>
 	{
 		private byte[] _payload = new byte[0];
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="EchoCommand"/> class.
+		///     Initializes a new instance of the <see cref="EchoCommand" /> class.
 		/// </summary>
 		public EchoCommand()
-			: base(new Identifier { MessageIdentifier = MessageIdentifier.Echo, MessageType = MessageType.CommandType})
-		{ }
+			: base(new Identifier {MessageIdentifier = MessageIdentifier.Echo, MessageType = MessageType.CommandType})
+		{
+		}
 
 		/// <summary>
-		/// Gets or sets the pay load.
+		///     Gets or sets the pay load.
 		/// </summary>
 		/// <value>
-		/// The pay load.
+		///     The pay load.
 		/// </value>
 		public byte[] PayLoad
 		{
@@ -29,70 +30,76 @@ namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 		}
 
 		/// <summary>
-		/// Populates the store.
-		/// </summary>
-		/// <param name="store">The store.</param>
-		protected override void PopulateStore(byte[] store)
-		{
-			SetByteArray(store, this.Key.Store.Length, this.PayLoad);
-		}
-
-		/// <summary>
-		/// Gets the length of the response.
+		///     Gets the length of the response.
 		/// </summary>
 		/// <value>
-		/// The length of the response.
+		///     The length of the response.
 		/// </value>
 		public override int ResponseLength
 		{
-			get { return this.PayLoad.Length; }
+			get { return PayLoad.Length; }
 		}
 
 		/// <summary>
-		/// Gets the length of the buffer.
+		///     Gets the length of the buffer.
 		/// </summary>
 		/// <value>
-		/// The length of the buffer.
+		///     The length of the buffer.
 		/// </value>
 		protected override int BufferLength
 		{
 			get { return base.BufferLength + PayLoad.Length; }
 		}
+
+		/// <summary>
+		///     Populates the store.
+		/// </summary>
+		/// <param name="store">The store.</param>
+		protected override void PopulateStore(byte[] store)
+		{
+			SetByteArray(store, Key.Store.Length, PayLoad);
+		}
 	}
 
-	sealed class EchoResponse : Response, IMessage<Identifier, byte[]>
+	internal sealed class EchoResponse : Response, IMessage<Identifier, byte[]>
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="EchoResponse"/> class.
+		///     Initializes a new instance of the <see cref="EchoResponse" /> class.
 		/// </summary>
 		public EchoResponse()
 		{
-			Key = new Key<Identifier>(new Identifier { MessageIdentifier = MessageIdentifier.Echo, MessageType = MessageType.ResponseType});
+			Key =
+				new Key<Identifier>(new Identifier
+				{
+					MessageIdentifier = MessageIdentifier.Echo,
+					MessageType = MessageType.ResponseType
+				});
 		}
 
 		/// <summary>
-		/// Gets the payload.
+		///     Gets the payload.
 		/// </summary>
 		/// <value>
-		/// The payload.
+		///     The payload.
 		/// </value>
 		public byte[] Payload
 		{
-			get { return GetByteArray(Store, this.Key.Store.Length, BufferLength - 1); }
+			get { return GetByteArray(Store, Key.Store.Length, BufferLength - 1); }
 		}
 	}
 
 	/// <summary>
-	/// Class EchoEvent.
+	///     Class EchoEvent.
 	/// </summary>
-	class EchoEvent : Event
+	internal class EchoEvent : Event
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="EchoEvent"/> class.
+		///     Initializes a new instance of the <see cref="EchoEvent" /> class.
 		/// </summary>
 		public EchoEvent()
 		{
-			Key = new Key<Identifier>(new Identifier { MessageIdentifier = MessageIdentifier.Echo, MessageType = MessageType.EventType});
+			Key =
+				new Key<Identifier>(new Identifier {MessageIdentifier = MessageIdentifier.Echo, MessageType = MessageType.EventType});
 		}
 	}
 }

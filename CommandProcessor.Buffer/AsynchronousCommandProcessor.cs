@@ -3,7 +3,7 @@
 namespace Veldy.Net.CommandProcessor.Buffer
 {
 	/// <summary>
-	/// Class AsynchronousCommandProcessor.
+	///     Class AsynchronousCommandProcessor.
 	/// </summary>
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
 	/// <typeparam name="TCommand">The type of the t command.</typeparam>
@@ -12,11 +12,13 @@ namespace Veldy.Net.CommandProcessor.Buffer
 	/// <typeparam name="TEvent">The type of the t event.</typeparam>
 	public abstract class AsynchronousCommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse, TEvent>
 		: AsynchronousCommandProcessor<TIdentifier, byte[], TCommand, TCommandWithResponse, TResponse, TEvent>,
-		IAsynchronousCommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse, TEvent>
-		where TIdentifier : struct, IConvertible
-		where TCommand : class, ICommand<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]> 
+			IAsynchronousCommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse, TEvent>
+		where TIdentifier : struct, IConvertible, IComparable<byte[]> 
+		where TCommand : class, ICommand<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>
 		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, byte[], TResponse>,
 			ICommand<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>
-		where TResponse : class, IResponse<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>, new() where TEvent : class, IEvent<TIdentifier>, IEvent<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>, new()
-	{ }
+		where TResponse : class, IResponse<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>, new()
+		where TEvent : class, IEvent<TIdentifier>, IEvent<TIdentifier, byte[]>, IMessage<TIdentifier, byte[]>, new()
+	{
+	}
 }

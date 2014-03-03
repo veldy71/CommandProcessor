@@ -1,14 +1,11 @@
-﻿namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
+﻿using Veldy.Net.CommandProcessor.Buffer;
+
+namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 {
 	/// <summary>
-	/// Class Response.
+	///     Class Response.
 	/// </summary>
-	class Response : Buffer.Response<Identifier>, IResponse
+	internal class Response : Response<Identifier>, IResponse
 	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Response"/> class.
-		/// </summary>
-		public Response()
-		{ }
 	}
 }

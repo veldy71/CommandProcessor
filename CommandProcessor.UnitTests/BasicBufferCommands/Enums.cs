@@ -1,13 +1,13 @@
 ﻿namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
 	/// <summary>
-	/// Enum MessageIdentifier
+	///     Enum MessageIdentifier
 	/// </summary>
 	public enum MessageIdentifier : byte
-    {
+	{
 		/// <summary>
-		/// Echo
+		///     Echo
 		/// </summary>
-        Echo = 0x01
-    }
+		Echo = 0x01
+	}
 }

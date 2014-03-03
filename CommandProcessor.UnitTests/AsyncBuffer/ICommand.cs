@@ -1,9 +1,11 @@
-﻿namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
+﻿using Veldy.Net.CommandProcessor.Buffer;
+
+namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 {
 	/// <summary>
-	/// Interface ICommand
+	///     Interface ICommand
 	/// </summary>
-	interface ICommand : Buffer.ICommand<Identifier>, IMessage
+	internal interface ICommand : ICommand<Identifier>, IMessage
 	{
-	} 
+	}
 }

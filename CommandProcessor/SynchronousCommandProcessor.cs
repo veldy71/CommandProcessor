@@ -4,7 +4,7 @@ using System.Linq;
 namespace Veldy.Net.CommandProcessor
 {
 	/// <summary>
-	/// Class SynchronousCommandProcessor.
+	///     Class SynchronousCommandProcessor.
 	/// </summary>
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
 	/// <typeparam name="TStore">The type of the t store.</typeparam>
@@ -13,7 +13,7 @@ namespace Veldy.Net.CommandProcessor
 	/// <typeparam name="TResponse">The type of the t response.</typeparam>
 	public abstract class SynchronousCommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>
 		: CommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>
-		where TIdentifier : struct, IConvertible
+		where TIdentifier : struct, IConvertible, IComparable<TStore>
 		where TStore : class
 		where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>,
@@ -21,13 +21,13 @@ namespace Veldy.Net.CommandProcessor
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 	{
 		/// <summary>
-		/// Processes the commands.
+		///     Processes the commands.
 		/// </summary>
 		protected override void ProcessCommands()
 		{
-			while (this.IsProcessingMessages)
+			while (IsProcessingMessages)
 			{
-				_ProcessCommandsResetEvent.WaitOne(this.CommandWait);
+				_ProcessCommandsResetEvent.WaitOne(CommandWait);
 
 				ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>> transaction = null;
 
@@ -46,9 +46,9 @@ namespace Veldy.Net.CommandProcessor
 						{
 							var commandWithResponseTransaction = ((ICommandWithResponseTransaction
 								<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore, TResponse>,
-									TResponse>)transaction);
+									TResponse>) transaction);
 
-							var responseStore = PushCommandWithResponse(commandWithResponseTransaction.CommandWithResponse);
+							TStore responseStore = PushCommandWithResponse(commandWithResponseTransaction.CommandWithResponse);
 							commandWithResponseTransaction.SetResponseStore(responseStore);
 						}
 						else
@@ -67,14 +67,15 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		/// Pushes the command with response.
+		///     Pushes the command with response.
 		/// </summary>
 		/// <param name="commandWithResponse">The command with response.</param>
 		/// <returns></returns>
-		protected abstract TStore PushCommandWithResponse(ICommandWithResponse<TIdentifier, TStore, TResponse> commandWithResponse);
+		protected abstract TStore PushCommandWithResponse(
+			ICommandWithResponse<TIdentifier, TStore, TResponse> commandWithResponse);
 
 		/// <summary>
-		/// Pushes the command without response.
+		///     Pushes the command without response.
 		/// </summary>
 		/// <param name="command">The command.</param>
 		protected abstract void PushCommandWithoutResponse(ICommand<TIdentifier, TStore> command);

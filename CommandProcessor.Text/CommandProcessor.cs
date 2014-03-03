@@ -3,7 +3,7 @@
 namespace Veldy.Net.CommandProcessor.Text
 {
 	/// <summary>
-	/// Class CommandProcessor.
+	///     Class CommandProcessor.
 	/// </summary>
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
 	/// <typeparam name="TCommand">The type of the t command.</typeparam>
@@ -11,20 +11,13 @@ namespace Veldy.Net.CommandProcessor.Text
 	/// <typeparam name="TResponse">The type of the t response.</typeparam>
 	public abstract class CommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse>
 		: SynchronousCommandProcessor<TIdentifier, string, TCommand, TCommandWithResponse, TResponse>,
-            ICommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse>
-        where TIdentifier : struct, IConvertible
-        where TCommand : class, ICommand<TIdentifier>, ICommand<TIdentifier, string>, IMessage<TIdentifier, string>
-        where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TResponse>,
-            ICommandWithResponse<TIdentifier, string, TResponse>, ICommand<TIdentifier, string>,
-            IMessage<TIdentifier, string>
+			ICommandProcessor<TIdentifier, TCommand, TCommandWithResponse, TResponse>
+		where TIdentifier : struct, IConvertible, IComparable<string> 
+		where TCommand : class, ICommand<TIdentifier>, ICommand<TIdentifier, string>, IMessage<TIdentifier, string>
+		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TResponse>,
+			ICommandWithResponse<TIdentifier, string, TResponse>, ICommand<TIdentifier, string>,
+			IMessage<TIdentifier, string>
 		where TResponse : class, IResponse<TIdentifier>, IResponse<TIdentifier, string>, IMessage<TIdentifier, string>, new()
 	{
-
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CommandProcessor{TIdentifier, TCommand, TCommandWithResponse, TIResponse, TResponse}"/> class.
-		/// </summary>
-		protected CommandProcessor()
-        {
-        }
-    }
+	}
 }

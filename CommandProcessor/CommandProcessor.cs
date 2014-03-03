@@ -3,13 +3,10 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
 
-/// <summary>
-/// The CommandProcessor namespace.
-/// </summary>
 namespace Veldy.Net.CommandProcessor
 {
 	/// <summary>
-	/// Class CommandProcessor.
+	///     Class CommandProcessor.
 	/// </summary>
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
 	/// <typeparam name="TStore">The type of the t store.</typeparam>
@@ -18,47 +15,28 @@ namespace Veldy.Net.CommandProcessor
 	/// <typeparam name="TResponse">The type of the t response.</typeparam>
 	public abstract class CommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>
 		: ICommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>
-		where TIdentifier : struct, IConvertible
+		where TIdentifier : struct, IConvertible, IComparable<TStore>
 		where TStore : class
 		where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>,
 			ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 	{
-		/// <summary>
-		/// The _disposed
-		/// </summary>
-		private bool _disposed = false;
-		/// <summary>
-		/// The _timeout stopwatch
-		/// </summary>
-		private readonly Stopwatch _timeoutStopwatch = new Stopwatch();
-
-		/// <summary>
-		/// The _is processing commands
-		/// </summary>
-		private bool _isProcessingCommands = false;
-		/// <summary>
-		/// The _command processing thread
-		/// </summary>
-		private Thread _commandProcessingThread = null;
-		/// <summary>
-		/// The _ process commands reset event
-		/// </summary>
-		protected readonly AutoResetEvent _ProcessCommandsResetEvent = new AutoResetEvent(false);
-		/// <summary>
-		/// The _ command lock
-		/// </summary>
 		protected readonly object _CommandLock = new object();
-
-		/// <summary>
-		/// The _ command queue
-		/// </summary>
 		protected readonly Queue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>> _CommandQueue
 			= new Queue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>>();
+		protected readonly AutoResetEvent _ProcessCommandsResetEvent = new AutoResetEvent(false);
+		private readonly Stopwatch _timeoutStopwatch = new Stopwatch();
+		private Thread _commandProcessingThread;
+		private bool _disposed;
+		private bool _isProcessingCommands;
+		public const ThreadPriority DefaultCommunicationThreadPriority = ThreadPriority.AboveNormal;
+		public const int DefaultCommandTimeout = 10000;
+		public const int DefaultCommandWait = 100;
 
 		/// <summary>
-		/// Initializes a new instance of the <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}" /> class.
+		///     Initializes a new instance of the
+		///     <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}" /> class.
 		/// </summary>
 		protected CommandProcessor()
 		{
@@ -68,15 +46,16 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		/// Finalizes an instance of the <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}" /> class.
+		///     Gets the communication thread priority.
 		/// </summary>
-		~CommandProcessor()
+		/// <value>The communication thread priority.</value>
+		protected virtual ThreadPriority CommunicationThreadPriority
 		{
-			Dispose(false);
+			get { return DefaultCommunicationThreadPriority; }
 		}
 
 		/// <summary>
-		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
 		/// </summary>
 		public void Dispose()
 		{
@@ -85,45 +64,25 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		/// Releases unmanaged and - optionally - managed resources.
-		/// </summary>
-		/// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-		private void Dispose(bool disposing)
-		{
-			if (!_disposed)
-			{
-				if (disposing)
-				{ }
-
-				_timeoutStopwatch.Stop();
-
-				if (_isProcessingCommands)
-					StopProcessing();
-
-				_disposed = true;
-			}
-		}
-
-		/// <summary>
-		/// Gets the command wait time in milliseconds.
+		///     Gets the command wait time in milliseconds.
 		/// </summary>
 		/// <value>The command wait.</value>
 		public virtual int CommandWait
 		{
-			get { return 100; }
+			get { return DefaultCommandWait; }
 		}
 
 		/// <summary>
-		/// Gets the command timeout.
+		///     Gets the command timeout.
 		/// </summary>
 		/// <value>The command timeout.</value>
 		public virtual int CommandTimeout
 		{
-			get { return 10000; }
+			get { return DefaultCommandTimeout; }
 		}
 
 		/// <summary>
-		/// Gets a value indicating whether [is processing messages].
+		///     Gets a value indicating whether [is processing messages].
 		/// </summary>
 		/// <value><c>true</c> if [is processing messages]; otherwise, <c>false</c>.</value>
 		public bool IsProcessingMessages
@@ -132,13 +91,7 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		/// Gets the communication thread priority.
-		/// </summary>
-		/// <value>The communication thread priority.</value>
-		protected virtual ThreadPriority CommunicationThreadPriority { get { return ThreadPriority.AboveNormal; } }
-
-		/// <summary>
-		/// Sends the command.
+		///     Sends the command.
 		/// </summary>
 		/// <typeparam name="TRsp">The type of the t RSP.</typeparam>
 		/// <param name="command">The command.</param>
@@ -164,7 +117,7 @@ namespace Veldy.Net.CommandProcessor
 				}
 
 				// wait for the background worker to process the command
-				var signaled = transaction.ResetEvent.WaitOne(this.CommandTimeout);
+				bool signaled = transaction.ResetEvent.WaitOne(CommandTimeout);
 				if (!signaled)
 					throw new TimeoutException();
 
@@ -184,7 +137,7 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		/// Sends the command without a response.
+		///     Sends the command without a response.
 		/// </summary>
 		/// <param name="command">The command.</param>
 		/// <exception cref="System.TimeoutException"></exception>
@@ -204,7 +157,7 @@ namespace Veldy.Net.CommandProcessor
 					_ProcessCommandsResetEvent.Set();
 				}
 
-				var signaled = transaction.ResetEvent.WaitOne(this.CommandTimeout);
+				bool signaled = transaction.ResetEvent.WaitOne(CommandTimeout);
 				if (!signaled)
 					throw new TimeoutException();
 
@@ -222,27 +175,27 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		/// Starts the command processing.
+		///     Starts the command processing.
 		/// </summary>
 		public virtual void StartProcessing()
 		{
 			if (!IsProcessingMessages)
 			{
 				_isProcessingCommands = true;
-				_commandProcessingThread = new Thread(ProcessCommands) {Priority = this.CommunicationThreadPriority, IsBackground = true};
+				_commandProcessingThread = new Thread(ProcessCommands) {Priority = CommunicationThreadPriority, IsBackground = true};
 				_commandProcessingThread.Start();
 			}
 		}
 
 		/// <summary>
-		/// Stops the command processing.
+		///     Stops the command processing.
 		/// </summary>
 		public virtual void StopProcessing()
 		{
 			if (IsProcessingMessages)
 			{
 				_isProcessingCommands = false;
-				var signaled = _commandProcessingThread.Join(this.CommandWait);
+				bool signaled = _commandProcessingThread.Join(CommandWait);
 				if (!signaled)
 					_commandProcessingThread.Abort();
 
@@ -251,7 +204,40 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		/// Processes the commands.
+		///     Finalizes an instance of the
+		///     <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}" /> class.
+		/// </summary>
+		~CommandProcessor()
+		{
+			Dispose(false);
+		}
+
+		/// <summary>
+		///     Releases unmanaged and - optionally - managed resources.
+		/// </summary>
+		/// <param name="disposing">
+		///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
+		///     unmanaged resources.
+		/// </param>
+		private void Dispose(bool disposing)
+		{
+			if (!_disposed)
+			{
+				if (disposing)
+				{
+				}
+
+				_timeoutStopwatch.Stop();
+
+				if (_isProcessingCommands)
+					StopProcessing();
+
+				_disposed = true;
+			}
+		}
+
+		/// <summary>
+		///     Processes the commands.
 		/// </summary>
 		protected abstract void ProcessCommands();
 	}

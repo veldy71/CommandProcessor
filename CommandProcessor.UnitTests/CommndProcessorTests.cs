@@ -5,13 +5,13 @@ using Veldy.Net.CommandProcessor.UnitTests.BasicTextCommands;
 namespace Veldy.Net.CommandProcessor.UnitTests
 {
 	/// <summary>
-	/// Class CommandProcessorTests.
+	///     Class CommandProcessorTests.
 	/// </summary>
 	[TestClass]
 	public class CommandProcessorTests
 	{
 		/// <summary>
-		/// Basics the buffer start stop command processor test.
+		///     Basics the buffer start stop command processor test.
 		/// </summary>
 		[TestMethod]
 		public void BasicBufferStartStopCommandProcessorTest()
@@ -30,7 +30,7 @@ namespace Veldy.Net.CommandProcessor.UnitTests
 		}
 
 		/// <summary>
-		/// Basics the text start stop command processor test.
+		///     Basics the text start stop command processor test.
 		/// </summary>
 		[TestMethod]
 		public void BasicTextStartStopCommandProcessorTest()

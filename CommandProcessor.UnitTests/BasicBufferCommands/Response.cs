@@ -3,12 +3,12 @@
 namespace Veldy.Net.CommandProcessor.UnitTests.BasicBufferCommands
 {
 	/// <summary>
-	/// Class Response.
+	///     Class Response.
 	/// </summary>
-	class Response : Buffer.Response<MessageIdentifier>, IResponse
+	internal class Response : Response<MessageIdentifier>, IResponse
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Response"/> class.
+		///     Initializes a new instance of the <see cref="Response" /> class.
 		/// </summary>
 		public Response()
 		{

@@ -1,33 +1,33 @@
 ﻿namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 {
 	/// <summary>
-	/// Enum MessageIdentifier
+	///     Enum MessageIdentifier
 	/// </summary>
-	enum MessageIdentifier : byte
+	internal enum MessageIdentifier : byte
 	{
 		/// <summary>
-		/// Echo
+		///     Echo
 		/// </summary>
 		Echo = 0x01
 	}
 
 	/// <summary>
-	/// Enum MessageType
+	///     Enum MessageType
 	/// </summary>
-	enum MessageType : byte
+	internal enum MessageType : byte
 	{
 		/// <summary>
-		/// The command type
+		///     The command type
 		/// </summary>
 		CommandType = 0x01,
 
 		/// <summary>
-		/// The response type
+		///     The response type
 		/// </summary>
 		ResponseType = 0x02,
 
 		/// <summary>
-		/// The event type
+		///     The event type
 		/// </summary>
 		EventType = 0x03
 	}

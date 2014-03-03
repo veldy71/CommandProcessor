@@ -1,12 +1,14 @@
-﻿namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
+﻿using Veldy.Net.CommandProcessor.Buffer;
+
+namespace Veldy.Net.CommandProcessor.UnitTests.AsyncBuffer
 {
 	/// <summary>
-	/// Class Event.
+	///     Class Event.
 	/// </summary>
-	class Event : Buffer.Event<Identifier>, IEvent
+	internal class Event : Event<Identifier>, IEvent
 	{
 		/// <summary>
-		/// Initializes a new instance of the <see cref="Event" /> class.
+		///     Initializes a new instance of the <see cref="Event" /> class.
 		/// </summary>
 		public Event()
 			: base(default(Identifier))

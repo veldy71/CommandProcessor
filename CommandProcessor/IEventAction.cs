@@ -3,22 +3,22 @@
 namespace Veldy.Net.CommandProcessor
 {
 	/// <summary>
-	/// Interface IEventAction
+	///     Interface IEventAction
 	/// </summary>
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
 	/// <typeparam name="TStore">The type of the t store.</typeparam>
-	interface IEventAction<TIdentifier, TStore>
-		where TIdentifier : struct, IConvertible
+	internal interface IEventAction<TIdentifier, TStore>
+		where TIdentifier : struct, IConvertible, IComparable<TStore>
 		where TStore : class
 	{
 		/// <summary>
-		/// Invokes the specified evt.
+		///     Invokes the specified evt.
 		/// </summary>
 		/// <param name="evt">The evt.</param>
 		void Invoke(IEvent<TIdentifier, TStore> evt);
 
 		/// <summary>
-		/// Handles the event.
+		///     Handles the event.
 		/// </summary>
 		/// <param name="store">The store.</param>
 		/// <param name="handled">if set to <c>true</c> [handled].</param>
@@ -27,24 +27,24 @@ namespace Veldy.Net.CommandProcessor
 	}
 
 	/// <summary>
-	/// Interface IEventAction
+	///     Interface IEventAction
 	/// </summary>
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
 	/// <typeparam name="TStore">The type of the t store.</typeparam>
 	/// <typeparam name="TEvent">The type of the t event.</typeparam>
-	interface IEventAction<TIdentifier, TStore, TEvent> : IEventAction<TIdentifier, TStore>
+	internal interface IEventAction<TIdentifier, TStore, TEvent> : IEventAction<TIdentifier, TStore>
 		where TEvent : IEvent<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
-		where TIdentifier : struct, IConvertible
+		where TIdentifier : struct, IConvertible, IComparable<TStore>
 		where TStore : class
 	{
 		/// <summary>
-		/// Invokes the specified evt.
+		///     Invokes the specified evt.
 		/// </summary>
 		/// <param name="evt">The evt.</param>
 		void Invoke(TEvent evt);
 
 		/// <summary>
-		/// Handles the event.
+		///     Handles the event.
 		/// </summary>
 		/// <param name="store">The store.</param>
 		/// <param name="handled">if set to <c>true</c> [handled].</param>
