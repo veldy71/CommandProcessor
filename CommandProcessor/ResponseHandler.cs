@@ -14,15 +14,12 @@ namespace Veldy.Net.CommandProcessor
 		/// <summary>
 		/// Handles the response.
 		/// </summary>
-		/// <typeparam name="TCommandWithResponse">The type of the t command with response.</typeparam>
 		/// <typeparam name="TResponse">The type of the t response.</typeparam>
 		/// <param name="commandWithResponse">The command with response.</param>
 		/// <param name="store">The store.</param>
-		/// <returns>``1.</returns>
-		public static TResponse HandleResponse<TCommandWithResponse, TResponse>(TCommandWithResponse commandWithResponse,
-			TStore store)
-			where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>,
-				ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
+		/// <param name="postProcess">The post process.</param>
+		/// <returns>``0.</returns>
+		public static TResponse HandleResponse<TResponse>(ICommandWithResponse<TIdentifier, TStore, TResponse> commandWithResponse, TStore store, Action<ICommandWithResponse<TIdentifier, TStore, TResponse>, IResponse<TIdentifier, TStore>> postProcess = null)
 			where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 		{
 			var response = new TResponse();
@@ -30,6 +27,9 @@ namespace Veldy.Net.CommandProcessor
 			if (response.Key.IsMatch(store))
 			{
 				response.SetStore(store);
+
+				if (postProcess != null)
+					postProcess(commandWithResponse, response);
 
 				return response;
 			}

@@ -33,17 +33,10 @@ namespace CommandProcessor.Buffer.UnitTests
 		/// <summary>
 		/// Creates the response.
 		/// </summary>
-		/// <param name="store">The store.</param>
 		/// <returns>`0.</returns>
-		public TResponse CreateResponse(byte[] store)
+		public TResponse CreateResponse()
 		{
-			var response = ResponseHandler<Identifier, byte[]>.HandleResponse<ICommandWithResponse<TResponse>, TResponse>(this, store);
-
-			if (response != null)
-			{
-				response.ResponseLength = ResponseLength;
-				response.SetStore(store);
-			}
+			var response = new TResponse {ResponseLength = ResponseLength};
 
 			return response;
 		}
@@ -59,8 +52,7 @@ namespace CommandProcessor.Buffer.UnitTests
 				var store = new byte[CommandLength];
 
 				var idBytes = BitConverter.GetBytes(Convert.ToUInt16(Key.Identifier));
-				store[0] = idBytes[0];
-				store[1] = idBytes[1];
+				System.Buffer.BlockCopy(idBytes, 0, store, 0, idBytes.Length);
 
 				SetupStore(store);
 

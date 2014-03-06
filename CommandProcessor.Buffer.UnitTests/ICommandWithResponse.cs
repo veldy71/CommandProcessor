@@ -19,7 +19,7 @@ namespace CommandProcessor.Buffer.UnitTests
 	/// Interface ICommandWithResponse
 	/// </summary>
 	interface ICommandWithResponse<out TResponse> : ICommandWithResponse<Identifier, byte[], TResponse>, ICommand
-		where TResponse : class, IResponse, IResponse<Identifier, byte[]>, IMessage, IMessage<Identifier, byte[]>, new()
+		where TResponse : class, IResponse, IResponse<Identifier, byte[]>, IMessage, IMessage<Identifier, byte[]>
 	{
 	}
 }

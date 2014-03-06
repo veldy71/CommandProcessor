@@ -32,7 +32,7 @@ namespace Veldy.Net.CommandProcessor
 			: base(command)
 		{
 			CommandWithResponse = command;
-			Response = new TResponse();
+			Response = command.CreateResponse();
 
 			if (timeout < 1)
 				throw new ArgumentOutOfRangeException("timeout");

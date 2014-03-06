@@ -66,6 +66,7 @@
     <Compile Include="Message.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Response.cs" />
+    <Compile Include="SynchronousCommandProcessor.cs" />
     <Compile Include="SynchronousCommandProcessorTests.cs" />
   </ItemGroup>
   <ItemGroup>

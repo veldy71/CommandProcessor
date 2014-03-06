@@ -45,6 +45,59 @@ namespace CommandProcessor.Buffer.UnitTests
 		public MessageType MessageType { get; private set; }
 
 		/// <summary>
+		/// Performs an explicit conversion from <see cref="System.Byte[][]"/> to <see cref="Identifier"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		/// <exception cref="System.ArgumentNullException">value</exception>
+		/// <exception cref="System.ArgumentOutOfRangeException">value</exception>
+		public static explicit operator Identifier(byte[] value)
+		{
+			if (value == null)
+				throw new ArgumentNullException("value");
+
+			if (value.Length < 2)
+				throw new ArgumentOutOfRangeException("value");
+
+			var bytes = BitConverter.ToUInt16(value, 0);
+
+			return (Identifier) bytes;
+		}
+
+		/// <summary>
+		/// Performs an explicit conversion from <see cref="Identifier"/> to <see cref="System.Byte[][]"/>.
+		/// </summary>
+		/// <param name="identifier">The identifier.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static explicit operator byte[](Identifier identifier)
+		{
+			return BitConverter.GetBytes((ushort) identifier);
+		}
+
+		/// <summary>
+		/// Performs an explicit conversion from <see cref="System.UInt16"/> to <see cref="Identifier"/>.
+		/// </summary>
+		/// <param name="value">The value.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static explicit operator Identifier(ushort value)
+		{
+			var messageIdentifier = (MessageIdentifier) ((value >> 8) & 0xFF);
+			var messageType = (MessageType) (value & 0xFF);
+
+			return new Identifier(messageIdentifier, messageType);
+		}
+
+		/// <summary>
+		/// Performs an explicit conversion from <see cref="Identifier"/> to <see cref="System.UInt16"/>.
+		/// </summary>
+		/// <param name="identifier">The identifier.</param>
+		/// <returns>The result of the conversion.</returns>
+		public static explicit operator ushort(Identifier identifier)
+		{
+			return Convert.ToUInt16(identifier);
+		}
+
+		/// <summary>
 		/// Returns the <see cref="T:System.TypeCode" /> for this instance.
 		/// </summary>
 		/// <returns>The enumerated constant that is the <see cref="T:System.TypeCode" /> of the class or value type that implements this interface.</returns>
@@ -111,7 +164,7 @@ namespace CommandProcessor.Buffer.UnitTests
 		/// <returns>An 16-bit unsigned integer equivalent to the value of this instance.</returns>
 		public ushort ToUInt16(IFormatProvider provider)
 		{
-			return (ushort) (((byte) MessageIdentifier << 8) | (byte) MessageType);
+			return (ushort) (((ushort) MessageIdentifier << 8) | (ushort) MessageType);
 		}
 
 		/// <summary>

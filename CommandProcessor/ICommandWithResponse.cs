@@ -22,10 +22,9 @@ namespace Veldy.Net.CommandProcessor
 		int ResponseLength { get; }
 
 		/// <summary>
-		///     Creates the response.
+		/// Creates the response.
 		/// </summary>
-		/// <param name="store">The store.</param>
-		/// <returns></returns>
-		TResponse CreateResponse(TStore store);
+		/// <returns>`2.</returns>
+		TResponse CreateResponse();
 	}
 }

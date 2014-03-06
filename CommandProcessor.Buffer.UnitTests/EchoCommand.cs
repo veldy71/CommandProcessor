@@ -39,7 +39,7 @@
 		/// <param name="store">The store.</param>
 		protected override void SetupStore(byte[] store)
 		{
-			SetByteArray(2, Payload);
+			SetByteArray(store, 2, Payload);
 		}
 
 		/// <summary>
@@ -72,7 +72,7 @@
 		/// <value>The payload.</value>
 		public byte[] Payload
 		{
-			get { return GetByteArray(2, ResponseLength - 2); }
+			get { return GetByteArray(Store, 2, ResponseLength - 2); }
 		}
 	}
 }

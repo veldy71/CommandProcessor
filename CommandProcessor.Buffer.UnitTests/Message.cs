@@ -35,24 +35,26 @@ namespace CommandProcessor.Buffer.UnitTests
 		/// <summary>
 		/// Gets the byte array.
 		/// </summary>
+		/// <param name="source">The source.</param>
 		/// <param name="index">The index.</param>
 		/// <param name="length">The length.</param>
 		/// <returns>System.Byte[][].</returns>
-		protected byte[] GetByteArray(int index, int length)
+		protected static byte[] GetByteArray(byte[] source, int index, int length)
 		{
 			var value = new byte[length];
-			System.Buffer.BlockCopy(Store, index, value, 0, length);
+			System.Buffer.BlockCopy(source, index, value, 0, length);
 			return value;
 		}
 
 		/// <summary>
 		/// Sets the byte array.
 		/// </summary>
+		/// <param name="source">The source.</param>
 		/// <param name="index">The index.</param>
 		/// <param name="array">The array.</param>
-		protected void SetByteArray(int index, byte[] array)
+		protected static void SetByteArray(byte[] source, int index, byte[] array)
 		{
-			System.Buffer.BlockCopy(array, 0, Store, index, array.Length);
+			System.Buffer.BlockCopy(array, 0, source, index, array.Length);
 		}
 	}
 }
