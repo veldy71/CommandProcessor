@@ -44,9 +44,7 @@ namespace Veldy.Net.CommandProcessor
 					{
 						if (transaction.HasResponse)
 						{
-							var commandWithResponseTransaction = ((ICommandWithResponseTransaction
-								<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore, TResponse>,
-									TResponse>) transaction);
+							var commandWithResponseTransaction = ((ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>) transaction);
 
 							TStore responseStore = PushCommandWithResponse(commandWithResponseTransaction.CommandWithResponse);
 							commandWithResponseTransaction.SetResponseStore(responseStore);
@@ -56,7 +54,7 @@ namespace Veldy.Net.CommandProcessor
 							PushCommandWithoutResponse(transaction.Command);
 						}
 
-						transaction.SetInvactive();
+						transaction.SetInactive();
 					}
 					catch (Exception e)
 					{
@@ -71,8 +69,7 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		/// <param name="commandWithResponse">The command with response.</param>
 		/// <returns></returns>
-		protected abstract TStore PushCommandWithResponse(
-			ICommandWithResponse<TIdentifier, TStore, TResponse> commandWithResponse);
+		protected abstract TStore PushCommandWithResponse(ICommandWithResponse<TIdentifier, TStore> commandWithResponse);
 
 		/// <summary>
 		///     Pushes the command without response.

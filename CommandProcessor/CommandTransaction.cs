@@ -77,9 +77,9 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		///     Sets the invactive.
+		///     Sets the inactive.
 		/// </summary>
-		public void SetInvactive()
+		public void SetInactive()
 		{
 			IsActive = false;
 			ResetEvent.Set();
@@ -91,7 +91,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <param name="exception">The exception.</param>
 		public void SetException(Exception exception)
 		{
-			SetInvactive();
+			SetInactive();
 			Exception = exception;
 		}
 
@@ -131,6 +131,8 @@ namespace Veldy.Net.CommandProcessor
 						ResetEvent = null;
 					}
 				}
+
+				_disposed = true;
 			}
 		}
 	}

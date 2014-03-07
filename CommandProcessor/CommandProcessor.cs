@@ -35,17 +35,6 @@ namespace Veldy.Net.CommandProcessor
 		public const int DefaultCommandWait = 100;
 
 		/// <summary>
-		///     Initializes a new instance of the
-		///     <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}" /> class.
-		/// </summary>
-		protected CommandProcessor()
-		{
-			_timeoutStopwatch.Start();
-			CommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>.SetTimeoutStopwatch(
-				_timeoutStopwatch);
-		}
-
-		/// <summary>
 		///     Gets the communication thread priority.
 		/// </summary>
 		/// <value>The communication thread priority.</value>

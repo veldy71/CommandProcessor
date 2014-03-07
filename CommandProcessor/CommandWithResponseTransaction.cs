@@ -14,13 +14,14 @@ namespace Veldy.Net.CommandProcessor
 		: CommandTransaction<TIdentifier, TStore, TCommandWithResponse>,
 			ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>
 		where TIdentifier : struct, IConvertible, IComparable<TStore>
-		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>,
+		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommandWithResponse<TIdentifier, TStore>,
 			ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 		where TStore : class
 	{
 		private readonly int _timeout;
 		private bool _waitingForResponse;
+		private static Stopwatch _timeoutStopwatch = null;
 
 		/// <summary>
 		///     Initializes a new instance of the
@@ -32,7 +33,6 @@ namespace Veldy.Net.CommandProcessor
 			: base(command)
 		{
 			CommandWithResponse = command;
-			Response = command.CreateResponse();
 
 			if (timeout < 1)
 				throw new ArgumentOutOfRangeException("timeout");
@@ -44,7 +44,19 @@ namespace Veldy.Net.CommandProcessor
 		///     Gets the timeout stop watch.
 		/// </summary>
 		/// <value>The timeout stop watch.</value>
-		protected static Stopwatch TimeoutStopWatch { get; private set; }
+		protected static Stopwatch TimeoutStopWatch
+		{
+			get
+			{
+				if (_timeoutStopwatch == null)
+				{
+					_timeoutStopwatch = new Stopwatch();
+					_timeoutStopwatch.Start();
+				}
+
+				return _timeoutStopwatch;
+			}
+		}
 
 		/// <summary>
 		///     Gets the command with response.
@@ -52,7 +64,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <value>
 		///     The command with response.
 		/// </value>
-		public TCommandWithResponse CommandWithResponse { get; private set; }
+		public ICommandWithResponse<TIdentifier, TStore> CommandWithResponse { get; private set; }
 
 		/// <summary>
 		///     Gets the response.
@@ -82,10 +94,14 @@ namespace Veldy.Net.CommandProcessor
 		{
 			IsActive = false;
 
-			if (Response.Key.CompareTo(store) == 0)
+			var response = ((ICommandWithResponse<TIdentifier, TStore, TResponse>)CommandWithResponse).CreateResponse();
+
+			if (response.Key.CompareTo(store) == 0)
 			{
+				Response = response;
 				Response.SetStore(store);
-				SetInvactive();
+				SetInactive();
+
 				return true;
 			}
 
@@ -122,22 +138,5 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		/// <value>The awaiting response since timestamp.</value>
 		public long AwaitingResponseSinceTimestamp { get; private set; }
-
-		/// <summary>
-		///     Sets the timeout stopwatch.
-		/// </summary>
-		/// <param name="stopwatch">The stopwatch.</param>
-		/// <exception cref="System.ArgumentNullException">stopwatch</exception>
-		/// <exception cref="System.ArgumentOutOfRangeException">stopwatch</exception>
-		public static void SetTimeoutStopwatch(Stopwatch stopwatch)
-		{
-			if (stopwatch == null)
-				throw new ArgumentNullException("stopwatch");
-
-			if (stopwatch != null && TimeoutStopWatch != null)
-				throw new ArgumentOutOfRangeException("stopwatch");
-
-			TimeoutStopWatch = stopwatch;
-		}
 	}
 }

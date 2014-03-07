@@ -4,30 +4,18 @@ using System.Threading;
 namespace Veldy.Net.CommandProcessor
 {
 	/// <summary>
-	///     Interface ICommandTransaction
+	/// Interface ICommandTransaction
 	/// </summary>
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
 	/// <typeparam name="TStore">The type of the t store.</typeparam>
-	/// <typeparam name="TCommand">The type of the t command.</typeparam>
-	public interface ICommandTransaction<TIdentifier, TStore, out TCommand> : IDisposable
-		where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
+	public interface ICommandTransaction<TIdentifier, TStore> : IDisposable
 		where TIdentifier : struct, IConvertible, IComparable<TStore>
 		where TStore : class
 	{
 		/// <summary>
-		///     Gets the command.
+		/// Gets a value indicating whether [is active].
 		/// </summary>
-		/// <value>
-		///     The command.
-		/// </value>
-		TCommand Command { get; }
-
-		/// <summary>
-		///     Gets a value indicating whether [is active].
-		/// </summary>
-		/// <value>
-		///     <c>true</c> if [is active]; otherwise, <c>false</c>.
-		/// </value>
+		/// <value><c>true</c> if [is active]; otherwise, <c>false</c>.</value>
 		bool IsActive { get; }
 
 		/// <summary>
@@ -55,14 +43,34 @@ namespace Veldy.Net.CommandProcessor
 		bool HasResponse { get; }
 
 		/// <summary>
-		///     Sets the invactive.
+		///     Sets the inactive.
 		/// </summary>
-		void SetInvactive();
+		void SetInactive();
 
 		/// <summary>
 		///     Sets the exception.
 		/// </summary>
 		/// <param name="exception">The exception.</param>
 		void SetException(Exception exception);
+	}
+
+	/// <summary>
+	///     Interface ICommandTransaction
+	/// </summary>
+	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
+	/// <typeparam name="TStore">The type of the t store.</typeparam>
+	/// <typeparam name="TCommand">The type of the t command.</typeparam>
+	public interface ICommandTransaction<TIdentifier, TStore, out TCommand> : ICommandTransaction<TIdentifier, TStore>
+		where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
+		where TIdentifier : struct, IConvertible, IComparable<TStore>
+		where TStore : class
+	{
+		/// <summary>
+		///     Gets the command.
+		/// </summary>
+		/// <value>
+		///     The command.
+		/// </value>
+		TCommand Command { get; }
 	}
 }

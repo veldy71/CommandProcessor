@@ -1,44 +1,24 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CommandProcessor.Buffer.UnitTests
 {
 	[TestClass]
-	public class SynchronousCommandProcessorTests
+	public class AsynchronousCommandProcessorTests
 	{
 		/// <summary>
-		/// Basic command test.
+		/// Asynchronous the command processor test.
 		/// </summary>
 		[TestMethod]
-		public void BasicCommandTest()
+		public void AsynchronousCommandProcessorTest()
 		{
-			var payload = new byte[] {0x01, 0x02, 0x03, 0x04};
+			var payload = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A };
 
-			var command = new EchoCommand { Payload = payload};
-
-			var idBytes= BitConverter.GetBytes((ushort) new Identifier(MessageIdentifier.Echo, MessageType.ResponseType));
-
-			var responseStore = new byte[idBytes.Length + payload.Length];
-			System.Buffer.BlockCopy(idBytes, 0, responseStore, 0, idBytes.Length);
-			System.Buffer.BlockCopy(payload, 0, responseStore, idBytes.Length, payload.Length);
-
-			var response = command.CreateResponse();
-
-			Assert.IsNotNull(response);
-
-			response.SetStore(responseStore);
-
-			Assert.IsTrue(response.Key.IsMatch(responseStore));
-			Assert.IsInstanceOfType(response, typeof(EchoResponse));
-			Assert.IsTrue(BufferCompare(response.Payload, payload));
-		}
-
-		[TestMethod]
-		public void SynchronousCommandProcessorTest()
-		{
-			var payload = new byte[] {0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A};
-
-			var commandProcessor = new SynchronousCommandProcessor();
+			var commandProcessor = new AsynchronousCommandProcessor();
 
 			try
 			{
@@ -46,7 +26,7 @@ namespace CommandProcessor.Buffer.UnitTests
 				commandProcessor.StartProcessing();
 				Assert.IsTrue(commandProcessor.IsProcessingMessages);
 
-				var echoResponse = commandProcessor.SendCommandWithResponse(new EchoCommand {Payload = payload});
+				var echoResponse = commandProcessor.SendCommandWithResponse(new EchoCommand { Payload = payload });
 				Assert.IsNotNull(echoResponse);
 				Assert.IsInstanceOfType(echoResponse, typeof(EchoResponse));
 

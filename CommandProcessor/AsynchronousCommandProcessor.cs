@@ -21,14 +21,14 @@ namespace Veldy.Net.CommandProcessor
 		where TIdentifier : struct, IConvertible, IComparable<TStore>
 		where TStore : class
 		where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
-		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>,
+		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommandWithResponse<TIdentifier, TStore>,
 			ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 		where TEvent : class, IEvent<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 	{
 		private readonly
-			List<ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>> _commandsAwaitingResponse
-				= new List<ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>>();
+			List<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>> _commandsAwaitingResponse
+				= new List<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>>();
 
 		private readonly List<IEventAction<TIdentifier, TStore>> _eventActions = new List<IEventAction<TIdentifier, TStore>>();
 		private readonly object _eventLock = new object();
@@ -150,8 +150,7 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		/// <param name="commandWithResponse">The command with response.</param>
 		/// <returns>System.Boolean.</returns>
-		protected abstract bool PushCommandWithResponseAsync(
-			ICommandWithResponse<TIdentifier, TStore, TResponse> commandWithResponse);
+		protected abstract bool PushCommandWithResponseAsync(ICommandWithResponse<TIdentifier, TStore> commandWithResponse);
 
 		/// <summary>
 		///     Processes the commands.
@@ -184,9 +183,7 @@ namespace Veldy.Net.CommandProcessor
 						{
 							if (transaction.HasResponse)
 							{
-								var commandWithResponseTransaction = ((ICommandWithResponseTransaction
-									<TIdentifier, TStore, TCommandWithResponse,
-										TResponse>) transaction);
+								var commandWithResponseTransaction = ((ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>) transaction);
 
 								bool success = PushCommandWithResponseAsync(commandWithResponseTransaction.CommandWithResponse);
 								if (success)
@@ -200,7 +197,7 @@ namespace Veldy.Net.CommandProcessor
 							else
 							{
 								if (PushCommandWithoutResponseAsynchronous(transaction.Command))
-									transaction.SetInvactive();
+									transaction.SetInactive();
 							}
 						}
 						catch (Exception e)
@@ -236,11 +233,11 @@ namespace Veldy.Net.CommandProcessor
 						continue;
 
 					bool handled = false;
-					IEnumerator<ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>>
+					IEnumerator<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>>
 						transactionEnumerator = _commandsAwaitingResponse.Where(t => t.WaitingForResponse).GetEnumerator();
 					while (!handled && transactionEnumerator.MoveNext())
 					{
-						ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse> transaction =
+						ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>> transaction =
 							transactionEnumerator.Current;
 
 						lock (_CommandLock)
