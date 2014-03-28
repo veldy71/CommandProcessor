@@ -8,6 +8,15 @@ namespace CommandProcessor.Buffer.UnitTests
 	sealed class AsynchronousCommandProcessor : AsynchronousCommandProcessor<Identifier, byte[], ICommand, ICommandWithResponse<Response>, Response, IEvent>
 	{
 		/// <summary>
+		/// Gets the command timeout.
+		/// </summary>
+		/// <value>The command timeout.</value>
+		public override int CommandTimeout
+		{
+			get { return 3600000; }
+		}
+
+		/// <summary>
 		/// Pushes the command without response asynchronous.
 		/// </summary>
 		/// <param name="command">The command.</param>
@@ -25,7 +34,17 @@ namespace CommandProcessor.Buffer.UnitTests
 		/// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
 		protected override bool PushCommandWithResponseAsync(ICommandWithResponse<Identifier, byte[]> commandWithResponse)
 		{
-			// TODO 
+			// take the command and insert a response to it
+			if (commandWithResponse is EchoCommand)
+			{
+				// create an echo response and enqueue it
+				var echoCommand = (EchoCommand) commandWithResponse;
+				var echoResponse = echoCommand.CreateResponse();
+				echoResponse.SetPayload(echoCommand.Payload);
+
+				EnqueueMessage(echoResponse.Store);
+			}
+
 			return true;
 		}
 	}

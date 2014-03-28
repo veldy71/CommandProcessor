@@ -12,6 +12,7 @@
 // <summary></summary>
 // ***********************************************************************
 using System;
+using System.Diagnostics;
 
 namespace CommandProcessor.Buffer.UnitTests
 {
@@ -20,7 +21,7 @@ namespace CommandProcessor.Buffer.UnitTests
 	/// </summary>
 	class Response : Message, IResponse
 	{
-		private byte[] _store = new byte[0];
+		private byte[] _store = null;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="Response"/> class.
@@ -44,14 +45,37 @@ namespace CommandProcessor.Buffer.UnitTests
 			if (store.Length < 2)
 				throw new ArgumentOutOfRangeException("store");
 
-			_store = store;
+			if (_store == null || Key.IsMatch(store))
+				_store = store;
+			else 
+				throw new ArgumentOutOfRangeException("store");
 		}
 
 		/// <summary>
 		/// Gets the store.
 		/// </summary>
 		/// <value>The store.</value>
-		public override byte[] Store { get { return _store; } }
+		public override byte[] Store
+		{
+			get
+			{
+				if (_store == null || _store.Length != ResponseLength)
+				{
+					// allocate a new store copy all but the id
+					var old = _store;
+					_store = new byte[ResponseLength];
+
+					if (old != null)
+						System.Buffer.BlockCopy(old, ResponseLength, _store, ResponseLength, Math.Min(old.Length, ResponseLength - 2));
+
+					// copy the ID
+					var id = BitConverter.GetBytes(Convert.ToUInt16(Key.Identifier));
+					System.Buffer.BlockCopy(id, 0, _store, 0, id.Length);
+				}
+
+				return _store;
+			}
+		}
 
 		/// <summary>
 		/// Gets or sets the length of the response.

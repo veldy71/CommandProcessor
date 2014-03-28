@@ -46,8 +46,8 @@ namespace Veldy.Net.CommandProcessor
 		private bool _messageProcessing;
 		private Thread _messageProcessingThread;
 
-		public const int DefaultMessageLatency = 1500;
-		public const ThreadPriority DefautMessageThreadPriority = ThreadPriority.Normal;
+		private const int DefaultMessageLatency = 1500;
+		private const ThreadPriority DefautMessageThreadPriority = ThreadPriority.Normal;
 
 		/// <summary>
 		///     Gets the message latency.
@@ -235,7 +235,8 @@ namespace Veldy.Net.CommandProcessor
 					bool handled = false;
 					IEnumerator<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>>
 						transactionEnumerator = _commandsAwaitingResponse.Where(t => t.WaitingForResponse).GetEnumerator();
-					while (!handled && transactionEnumerator.MoveNext())
+
+					do
 					{
 						ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>> transaction =
 							transactionEnumerator.Current;
@@ -245,14 +246,14 @@ namespace Veldy.Net.CommandProcessor
 							if (transaction.SetResponseStore(message))
 								handled = true;
 						}
-					}
+					} while (!handled && transactionEnumerator.MoveNext());
 
 					if (handled)
 						continue;
 
 					lock (_eventLock)
 					{
-						Tuple<IEventAction<TIdentifier, TStore>, TEvent> t = HandleEvent(message, ref handled);
+						var t = HandleEvent(message, ref handled);
 						if (t != null && handled)
 						{
 							// queue the event to fire
@@ -305,7 +306,7 @@ namespace Veldy.Net.CommandProcessor
 				{
 					if (_eventQueue.Any())
 					{
-						Tuple<IEventAction<TIdentifier, TStore>, TEvent> item = _eventQueue.Dequeue();
+						var item = _eventQueue.Dequeue();
 						eventAction = item.Item1;
 						evt = item.Item2;
 					}

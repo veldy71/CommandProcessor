@@ -38,6 +38,8 @@ namespace CommandProcessor.Buffer.UnitTests
 		{
 			var response = new TResponse {ResponseLength = ResponseLength};
 
+
+
 			return response;
 		}
 
