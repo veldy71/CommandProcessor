@@ -59,6 +59,8 @@
     <Compile Include="CommandWithResponse.cs" />
     <Compile Include="EchoCommand.cs" />
     <Compile Include="Enums.cs" />
+    <Compile Include="Event.cs" />
+    <Compile Include="EventArgs.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="ICommandWithResponse.cs" />
     <Compile Include="Identifier.cs" />

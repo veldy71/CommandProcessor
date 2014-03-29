@@ -1,4 +1,5 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using System.Threading;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CommandProcessor.Buffer.UnitTests
 {
@@ -15,6 +16,15 @@ namespace CommandProcessor.Buffer.UnitTests
 
 			var commandProcessor = new AsynchronousCommandProcessor();
 
+			byte[] echoEventPayload = null;
+			var echoResetEvent = new ManualResetEvent(false);
+
+			commandProcessor.Echo += (sender, args) =>
+			{
+				echoEventPayload = args.Payload;
+				echoResetEvent.Set();
+			};
+
 			try
 			{
 				Assert.IsFalse(commandProcessor.IsProcessingCommands);
@@ -28,8 +38,12 @@ namespace CommandProcessor.Buffer.UnitTests
 				var echoResponse = commandProcessor.SendCommandWithResponse(new EchoCommand { Payload = payload });
 				Assert.IsNotNull(echoResponse);
 				Assert.IsInstanceOfType(echoResponse, typeof(EchoResponse));
-
 				Assert.IsTrue(BufferCompare(payload, echoResponse.Payload));
+
+				var handled = echoResetEvent.WaitOne(10000); // wait up to ten seconds for the event
+				Assert.IsTrue(handled, "The echo event never fired.");
+				Assert.IsTrue(BufferCompare(payload, echoEventPayload));
+				
 			}
 			finally
 			{
