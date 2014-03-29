@@ -25,7 +25,7 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		protected override void ProcessCommands()
 		{
-			while (IsProcessingMessages)
+			while (IsProcessingCommands)
 			{
 				_ProcessCommandsResetEvent.WaitOne(CommandWait);
 

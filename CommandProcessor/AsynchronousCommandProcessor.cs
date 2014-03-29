@@ -26,6 +26,8 @@ namespace Veldy.Net.CommandProcessor
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 		where TEvent : class, IEvent<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 	{
+		private bool _disposed = false;
+
 		private readonly
 			List<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>> _commandsAwaitingResponse
 				= new List<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>>();
@@ -43,19 +45,38 @@ namespace Veldy.Net.CommandProcessor
 		private readonly AutoResetEvent _messageResetEvent = new AutoResetEvent(false);
 
 		private Thread _eventProcessingThread;
-		private bool _messageProcessing;
 		private Thread _messageProcessingThread;
 
-		private const int DefaultMessageLatency = 1500;
 		private const ThreadPriority DefautMessageThreadPriority = ThreadPriority.Normal;
 
+		private const int DefaultMessageWait = 100;
+		private const int DefaultEventWait = 1000;
+
 		/// <summary>
-		///     Gets the message latency.
+		/// Initializes a new instance of the <see cref="AsynchronousCommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse, TEvent}"/> class.
 		/// </summary>
-		/// <value>The message latency.</value>
-		protected virtual int MessageLatency
+		protected AsynchronousCommandProcessor()
 		{
-			get { return DefaultMessageLatency; }
+			IsProcessingMessages = false;
+			IsProcessingEvents = false;
+		}
+
+		/// <summary>
+		/// Gets the event wait.
+		/// </summary>
+		/// <value>The event wait.</value>
+		public virtual int EventWait
+		{
+			get { return DefaultEventWait; }
+		}
+
+		/// <summary>
+		/// Gets the message wait.
+		/// </summary>
+		/// <value>The message wait.</value>
+		public virtual int MessageWait
+		{
+			get { return DefaultMessageWait; }
 		}
 
 		/// <summary>
@@ -68,27 +89,39 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
+		/// Gets the is processing messages.
+		/// </summary>
+		/// <value>The is processing messages.</value>
+		public bool IsProcessingMessages { get; private set; }
+
+		/// <summary>
+		/// Gets a value indicating whether this instance is processing events.
+		/// </summary>
+		/// <value><c>true</c> if this instance is processing events; otherwise, <c>false</c>.</value>
+		public bool IsProcessingEvents { get; private set; }
+
+		/// <summary>
 		///     Starts the processing.
 		/// </summary>
 		public override void StartProcessing()
 		{
 			base.StartProcessing();
 
-			if (!_messageProcessing)
+
+			if (!IsProcessingMessages)
 			{
-				_messageProcessing = true;
+				IsProcessingMessages = true;
 
-				lock (_messageLock)
-				{
-					_messageProcessingThread = new Thread(ProcessMessages) {Priority = MessageThreadPriority, IsBackground = true};
-					_messageProcessingThread.Start();
-				}
+				_messageProcessingThread = new Thread(ProcessMessages) {Priority = MessageThreadPriority, IsBackground = true};
+				_messageProcessingThread.Start();
+			}
 
-				lock (_eventLock)
-				{
-					_eventProcessingThread = new Thread(ProcessEvents) {Priority = MessageThreadPriority, IsBackground = true};
-					_eventProcessingThread.Start();
-				}
+			if (!IsProcessingEvents)
+			{
+				IsProcessingEvents = true;
+
+				_eventProcessingThread = new Thread(ProcessEvents) {Priority = MessageThreadPriority, IsBackground = true};
+				_eventProcessingThread.Start();
 			}
 		}
 
@@ -99,25 +132,24 @@ namespace Veldy.Net.CommandProcessor
 		{
 			base.StopProcessing();
 
-			if (_messageProcessing)
+			if (IsProcessingMessages)
 			{
-				_messageProcessing = false;
+				IsProcessingMessages = false;
 
-				lock (_messageLock)
-				{
-					if (!_messageProcessingThread.Join(MessageLatency * 11 / 10))
-						_messageProcessingThread.Abort();
+				if (!_messageProcessingThread.Join(MessageWait*2))
+					_messageProcessingThread.Abort();
 
-					_messageProcessingThread = null;
-				}
+				_messageProcessingThread = null;
+			}
 
-				lock (_eventLock)
-				{
-					if (!_eventProcessingThread.Join(MessageLatency* 11 / 10))
-						_eventProcessingThread.Abort();
+			if (IsProcessingEvents)
+			{
+				IsProcessingEvents = false;
 
-					_eventProcessingThread = null;
-				}
+				if (!_eventProcessingThread.Join(EventWait*2))
+					_eventProcessingThread.Abort();
+
+				_eventProcessingThread = null;
 			}
 		}
 
@@ -157,7 +189,7 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		protected override void ProcessCommands()
 		{
-			while (_messageProcessing)
+			while (IsProcessingCommands)
 			{
 				_ProcessCommandsResetEvent.WaitOne(CommandWait);
 
@@ -167,14 +199,22 @@ namespace Veldy.Net.CommandProcessor
 				{
 					transaction = null;
 
+					List<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>>
+						commandsToRemove;
+
 					lock (_CommandLock)
 					{
 						if (_CommandQueue.Any())
 							transaction = _CommandQueue.Dequeue();
 
-						// clear commands which found a response
-						_commandsAwaitingResponse.RemoveAll(t => !t.WaitingForResponse);
+						commandsToRemove = _commandsAwaitingResponse.Where(c => !c.WaitingForResponse).ToList();
+
+						// clear commands which found a response or timed out
+						commandsToRemove.ForEach(c => _commandsAwaitingResponse.Remove(c));
 					}
+
+					// inactivate any active expired commands
+					commandsToRemove.Where(c => c.IsActive).ToList().ForEach(c => c.SetInactive());
 
 					// process the transaction
 					if (transaction != null)
@@ -185,11 +225,11 @@ namespace Veldy.Net.CommandProcessor
 							{
 								var commandWithResponseTransaction = ((ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>) transaction);
 
-								bool success = PushCommandWithResponseAsync(commandWithResponseTransaction.CommandWithResponse);
+								commandWithResponseTransaction.SetWaitingForResponse();
+
+								var success = PushCommandWithResponseAsync(commandWithResponseTransaction.CommandWithResponse);
 								if (success)
 								{
-									commandWithResponseTransaction.SetWaitingForResponse();
-
 									lock (_CommandLock)
 										_commandsAwaitingResponse.Add(commandWithResponseTransaction);
 								}
@@ -214,9 +254,9 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		private void ProcessMessages()
 		{
-			while (_messageProcessing)
+			while (IsProcessingMessages)
 			{
-				_messageResetEvent.WaitOne(CommandWait);
+				_messageResetEvent.WaitOne(MessageWait);
 
 				TStore message;
 
@@ -232,21 +272,19 @@ namespace Veldy.Net.CommandProcessor
 					if (message == null)
 						continue;
 
-					bool handled = false;
-					IEnumerator<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>>
-						transactionEnumerator = _commandsAwaitingResponse.Where(t => t.WaitingForResponse).GetEnumerator();
+					var handled = false;
 
-					do
+					foreach (var transaction in _commandsAwaitingResponse.Where(t => t.WaitingForResponse && t.IsActive))
 					{
-						ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>> transaction =
-							transactionEnumerator.Current;
-
 						lock (_CommandLock)
 						{
 							if (transaction.SetResponseStore(message))
 								handled = true;
 						}
-					} while (!handled && transactionEnumerator.MoveNext());
+
+						if (handled)
+							break;
+					}
 
 					if (handled)
 						continue;
@@ -260,7 +298,7 @@ namespace Veldy.Net.CommandProcessor
 							_eventQueue.Enqueue(t);
 						}
 					}
-				} while (message != null);
+				} while (message != null && IsProcessingMessages);
 			}
 		}
 
@@ -295,9 +333,9 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		private void ProcessEvents()
 		{
-			while (_messageProcessing)
+			while (IsProcessingEvents)
 			{
-				_eventResetEvent.WaitOne(CommandWait);
+				_eventResetEvent.WaitOne(EventWait);
 
 				IEventAction<TIdentifier, TStore> eventAction = null;
 				TEvent evt = null;

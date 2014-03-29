@@ -8,15 +8,6 @@ namespace CommandProcessor.Buffer.UnitTests
 	sealed class AsynchronousCommandProcessor : AsynchronousCommandProcessor<Identifier, byte[], ICommand, ICommandWithResponse<Response>, Response, IEvent>
 	{
 		/// <summary>
-		/// Gets the command timeout.
-		/// </summary>
-		/// <value>The command timeout.</value>
-		public override int CommandTimeout
-		{
-			get { return 3600000; }
-		}
-
-		/// <summary>
 		/// Pushes the command without response asynchronous.
 		/// </summary>
 		/// <param name="command">The command.</param>

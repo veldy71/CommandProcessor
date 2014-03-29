@@ -23,6 +23,18 @@ namespace Veldy.Net.CommandProcessor
 		where TEvent : class, IEvent<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 	{
 		/// <summary>
+		/// Gets the message wait.
+		/// </summary>
+		/// <value>The message wait.</value>
+		int MessageWait { get; }
+
+		/// <summary>
+		/// Gets the event wait.
+		/// </summary>
+		/// <value>The event wait.</value>
+		int EventWait { get; }
+
+		/// <summary>
 		///     Enqueues the message.
 		/// </summary>
 		/// <param name="store">The store.</param>

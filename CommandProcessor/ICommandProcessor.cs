@@ -38,7 +38,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <value>
 		///     <c>true</c> if [is processing messages]; otherwise, <c>false</c>.
 		/// </value>
-		bool IsProcessingMessages { get; }
+		bool IsProcessingCommands { get; }
 
 		/// <summary>
 		///     Sends the command.

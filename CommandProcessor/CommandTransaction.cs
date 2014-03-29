@@ -79,7 +79,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <summary>
 		///     Sets the inactive.
 		/// </summary>
-		public void SetInactive()
+		public virtual void SetInactive()
 		{
 			IsActive = false;
 			ResetEvent.Set();

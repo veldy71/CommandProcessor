@@ -17,9 +17,13 @@ namespace CommandProcessor.Buffer.UnitTests
 
 			try
 			{
+				Assert.IsFalse(commandProcessor.IsProcessingCommands);
 				Assert.IsFalse(commandProcessor.IsProcessingMessages);
+				Assert.IsFalse(commandProcessor.IsProcessingEvents);
 				commandProcessor.StartProcessing();
+				Assert.IsTrue(commandProcessor.IsProcessingCommands);
 				Assert.IsTrue(commandProcessor.IsProcessingMessages);
+				Assert.IsTrue(commandProcessor.IsProcessingEvents);
 
 				var echoResponse = commandProcessor.SendCommandWithResponse(new EchoCommand { Payload = payload });
 				Assert.IsNotNull(echoResponse);
@@ -29,9 +33,13 @@ namespace CommandProcessor.Buffer.UnitTests
 			}
 			finally
 			{
+				Assert.IsTrue(commandProcessor.IsProcessingCommands);
 				Assert.IsTrue(commandProcessor.IsProcessingMessages);
+				Assert.IsTrue(commandProcessor.IsProcessingEvents);
 				commandProcessor.StopProcessing();
+				Assert.IsFalse(commandProcessor.IsProcessingCommands);
 				Assert.IsFalse(commandProcessor.IsProcessingMessages);
+				Assert.IsFalse(commandProcessor.IsProcessingEvents);
 			}
 		}
 

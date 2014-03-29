@@ -29,10 +29,17 @@ namespace Veldy.Net.CommandProcessor
 		private readonly Stopwatch _timeoutStopwatch = new Stopwatch();
 		private Thread _commandProcessingThread;
 		private bool _disposed;
-		private bool _isProcessingCommands;
-		public const ThreadPriority DefaultCommunicationThreadPriority = ThreadPriority.AboveNormal;
-		public const int DefaultCommandTimeout = 10000;
-		public const int DefaultCommandWait = 100;
+		private const ThreadPriority DefaultCommunicationThreadPriority = ThreadPriority.AboveNormal;
+		private const int DefaultCommandTimeout = 10000;
+		private const int DefaultCommandWait = 100;
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}"/> class.
+		/// </summary>
+		protected CommandProcessor()
+		{
+			IsProcessingCommands = false;
+		}
 
 		/// <summary>
 		///     Gets the communication thread priority.
@@ -52,8 +59,9 @@ namespace Veldy.Net.CommandProcessor
 			Dispose(true);
 		}
 
+
 		/// <summary>
-		///     Gets the command wait time in milliseconds.
+		/// Gets the command wait.
 		/// </summary>
 		/// <value>The command wait.</value>
 		public virtual int CommandWait
@@ -62,7 +70,7 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		///     Gets the command timeout.
+		/// Gets the command timeout.
 		/// </summary>
 		/// <value>The command timeout.</value>
 		public virtual int CommandTimeout
@@ -71,13 +79,10 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		///     Gets a value indicating whether [is processing messages].
+		/// Gets a value indicating whether this instance is processing commands.
 		/// </summary>
-		/// <value><c>true</c> if [is processing messages]; otherwise, <c>false</c>.</value>
-		public bool IsProcessingMessages
-		{
-			get { return _isProcessingCommands; }
-		}
+		/// <value><c>true</c> if this instance is processing commands; otherwise, <c>false</c>.</value>
+		public bool IsProcessingCommands { get; private set; }
 
 		/// <summary>
 		///     Sends the command.
@@ -106,7 +111,7 @@ namespace Veldy.Net.CommandProcessor
 				}
 
 				// wait for the background worker to process the command
-				bool signaled = transaction.ResetEvent.WaitOne(CommandTimeout);
+				var signaled = transaction.ResetEvent.WaitOne(CommandTimeout);
 				if (!signaled)
 					throw new TimeoutException();
 
@@ -168,10 +173,16 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		public virtual void StartProcessing()
 		{
-			if (!IsProcessingMessages)
+			if (!IsProcessingCommands)
 			{
-				_isProcessingCommands = true;
-				_commandProcessingThread = new Thread(ProcessCommands) {Priority = CommunicationThreadPriority, IsBackground = true};
+				IsProcessingCommands = true;
+
+				_commandProcessingThread = new Thread(ProcessCommands)
+				{
+					Priority = CommunicationThreadPriority,
+					IsBackground = true
+				};
+
 				_commandProcessingThread.Start();
 			}
 		}
@@ -181,11 +192,11 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		public virtual void StopProcessing()
 		{
-			if (IsProcessingMessages)
+			if (IsProcessingCommands)
 			{
-				_isProcessingCommands = false;
-				bool signaled = _commandProcessingThread.Join(CommandWait);
-				if (!signaled)
+				IsProcessingCommands = false;
+
+				if (!_commandProcessingThread.Join(CommandWait*2))
 					_commandProcessingThread.Abort();
 
 				_commandProcessingThread = null;
@@ -208,7 +219,7 @@ namespace Veldy.Net.CommandProcessor
 		///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
 		///     unmanaged resources.
 		/// </param>
-		private void Dispose(bool disposing)
+		protected virtual void Dispose(bool disposing)
 		{
 			if (!_disposed)
 			{
@@ -218,7 +229,7 @@ namespace Veldy.Net.CommandProcessor
 
 				_timeoutStopwatch.Stop();
 
-				if (_isProcessingCommands)
+				if (IsProcessingCommands)
 					StopProcessing();
 
 				_disposed = true;

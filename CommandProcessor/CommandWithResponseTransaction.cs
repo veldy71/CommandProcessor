@@ -20,7 +20,6 @@ namespace Veldy.Net.CommandProcessor
 		where TStore : class
 	{
 		private readonly int _timeout;
-		private bool _waitingForResponse;
 		private static Stopwatch _timeoutStopwatch = null;
 
 		/// <summary>
@@ -38,6 +37,8 @@ namespace Veldy.Net.CommandProcessor
 				throw new ArgumentOutOfRangeException("timeout");
 
 			_timeout = timeout;
+
+			AwaitingResponseSinceTimestamp = long.MinValue; // defaults to not waiting
 		}
 
 		/// <summary>
@@ -86,6 +87,15 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
+		/// Sets the inactive.
+		/// </summary>
+		public override void SetInactive()
+		{
+			AwaitingResponseSinceTimestamp = long.MinValue;
+			base.SetInactive();
+		}
+
+		/// <summary>
 		///     Sets the response store.
 		/// </summary>
 		/// <param name="store">The store.</param>
@@ -116,8 +126,7 @@ namespace Veldy.Net.CommandProcessor
 		{
 			get
 			{
-				return _waitingForResponse
-				       && (TimeoutStopWatch.ElapsedMilliseconds - AwaitingResponseSinceTimestamp) < _timeout;
+				return (TimeoutStopWatch.ElapsedMilliseconds - AwaitingResponseSinceTimestamp) < _timeout;
 			}
 		}
 
@@ -128,7 +137,6 @@ namespace Veldy.Net.CommandProcessor
 		{
 			if (Response == null)
 			{
-				_waitingForResponse = true;
 				AwaitingResponseSinceTimestamp = TimeoutStopWatch.ElapsedMilliseconds;
 			}
 		}

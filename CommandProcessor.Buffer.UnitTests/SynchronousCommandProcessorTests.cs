@@ -42,9 +42,9 @@ namespace CommandProcessor.Buffer.UnitTests
 
 			try
 			{
-				Assert.IsFalse(commandProcessor.IsProcessingMessages);
+				Assert.IsFalse(commandProcessor.IsProcessingCommands);
 				commandProcessor.StartProcessing();
-				Assert.IsTrue(commandProcessor.IsProcessingMessages);
+				Assert.IsTrue(commandProcessor.IsProcessingCommands);
 
 				var echoResponse = commandProcessor.SendCommandWithResponse(new EchoCommand {Payload = payload});
 				Assert.IsNotNull(echoResponse);
@@ -54,9 +54,9 @@ namespace CommandProcessor.Buffer.UnitTests
 			}
 			finally
 			{
-				Assert.IsTrue(commandProcessor.IsProcessingMessages);
+				Assert.IsTrue(commandProcessor.IsProcessingCommands);
 				commandProcessor.StopProcessing();
-				Assert.IsFalse(commandProcessor.IsProcessingMessages);
+				Assert.IsFalse(commandProcessor.IsProcessingCommands);
 			}
 		}
 
