@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Threading;
 
@@ -49,7 +50,7 @@ namespace Veldy.Net.CommandProcessor
 
 		private const ThreadPriority DefautMessageThreadPriority = ThreadPriority.Normal;
 
-		private const int DefaultMessageWait = 100;
+		private const int DefaultMessageWait = 1000;
 		private const int DefaultEventWait = 1000;
 
 		/// <summary>
@@ -199,53 +200,61 @@ namespace Veldy.Net.CommandProcessor
 				{
 					transaction = null;
 
-					List<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>>
-						commandsToRemove;
-
 					lock (_CommandLock)
 					{
 						if (_CommandQueue.Any())
 							transaction = _CommandQueue.Dequeue();
 
-						commandsToRemove = _commandsAwaitingResponse.Where(c => !c.WaitingForResponse).ToList();
+						foreach (var t in _commandsAwaitingResponse.ToList())
+						{
+							if (t.ResponseExpired)
+								lock(t)
+									t.SetInactive();
 
-						// clear commands which found a response or timed out
-						commandsToRemove.ForEach(c => _commandsAwaitingResponse.Remove(c));
+							if (!t.IsActive)
+								_commandsAwaitingResponse.Remove(t);
+						}
 					}
-
-					// inactivate any active expired commands
-					commandsToRemove.Where(c => c.IsActive).ToList().ForEach(c => c.SetInactive());
 
 					// process the transaction
 					if (transaction != null)
 					{
-						try
+						lock (transaction)
 						{
-							if (transaction.HasResponse)
+							try
 							{
-								var commandWithResponseTransaction = ((ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>) transaction);
-
-								commandWithResponseTransaction.SetWaitingForResponse();
-
-								var success = PushCommandWithResponseAsync(commandWithResponseTransaction.CommandWithResponse);
-								if (success)
+								if (transaction.HasResponse)
 								{
+									var commandWithResponseTransaction =
+										((ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>)
+											transaction);
+
 									lock (_CommandLock)
-										_commandsAwaitingResponse.Add(commandWithResponseTransaction);
+										commandWithResponseTransaction.SetWaitingForResponse();
+
+									var success = PushCommandWithResponseAsync(commandWithResponseTransaction.CommandWithResponse);
+									if (success)
+									{
+										lock (_CommandLock)
+											_commandsAwaitingResponse.Add(commandWithResponseTransaction);
+
+										_messageResetEvent.Set(); // let the message thread start work
+									}
+								}
+								else
+								{
+									if (PushCommandWithoutResponseAsynchronous(transaction.Command))
+										transaction.SetInactive();
 								}
 							}
-							else
+							catch (Exception e)
 							{
-								if (PushCommandWithoutResponseAsynchronous(transaction.Command))
-									transaction.SetInactive();
+								transaction.SetException(e);
 							}
 						}
-						catch (Exception e)
-						{
-							transaction.SetException(e);
-						}
 					}
-				} while (transaction != null);
+				} 
+				while (transaction != null);
 			}
 		}
 
@@ -274,16 +283,20 @@ namespace Veldy.Net.CommandProcessor
 
 					var handled = false;
 
-					foreach (var transaction in _commandsAwaitingResponse.Where(t => t.WaitingForResponse && t.IsActive))
+					lock (_CommandLock)
 					{
-						lock (_CommandLock)
+						foreach (var commandWithResponse in _commandsAwaitingResponse.Where(t => t.WaitingForResponse && t.IsActive))
 						{
-							if (transaction.SetResponseStore(message))
-								handled = true;
-						}
 
-						if (handled)
-							break;
+							if (commandWithResponse.SetResponseStore(message))
+							{
+								handled = true;
+								_commandsAwaitingResponse.Remove(commandWithResponse);
+							}
+
+							if (handled)
+								break;
+						}
 					}
 
 					if (handled)
@@ -313,6 +326,7 @@ namespace Veldy.Net.CommandProcessor
 		{
 			_eventActions.Add(new EventAction<TIdentifier, TStore, TEvt>(action, QueueEvent, key));
 		}
+
 
 		/// <summary>
 		///     Queues the event.

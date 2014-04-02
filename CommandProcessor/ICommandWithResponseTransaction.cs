@@ -14,10 +14,10 @@ namespace Veldy.Net.CommandProcessor
 		bool WaitingForResponse { get; }
 
 		/// <summary>
-		///     Gets the awaiting response since timestamp.
+		/// Gets a value indicating whether [response expired].
 		/// </summary>
-		/// <value>The awaiting response since timestamp.</value>
-		long AwaitingResponseSinceTimestamp { get; }
+		/// <value><c>true</c> if [response expired]; otherwise, <c>false</c>.</value>
+		bool ResponseExpired { get; }
 
 		/// <summary>
 		///     Sets the response store.

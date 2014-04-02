@@ -13,7 +13,24 @@ namespace CommandProcessor.Buffer.UnitTests
 		/// </summary>
 		public AsynchronousCommandProcessor()
 		{
-			RegisterEventHandler(new Key(new Identifier(MessageIdentifier.Echo, MessageType.EventType)), new Action<EchoEvent>(OnEcho));
+			RegisterEventHandler(MessageIdentifier.Echo, new Action<EchoEvent>(OnEcho));
+		}
+
+		/// <summary>
+		/// Occurs when [echo].
+		/// </summary>
+		public event EventHandler<EchoEventArgs> Echo;
+
+		/// <summary>
+		/// Registers the event handler.
+		/// </summary>
+		/// <typeparam name="TEvt">The type of the t evt.</typeparam>
+		/// <param name="messageIdentifier">The message identifier.</param>
+		/// <param name="eventAction">The event action.</param>
+		private void RegisterEventHandler<TEvt>(MessageIdentifier messageIdentifier, Action<TEvt> eventAction)
+			where TEvt : Event, IEvent<Identifier, byte[]>, IMessage<Identifier, byte[]>, new()
+		{
+			RegisterEventHandler(new Key(new Identifier(messageIdentifier, MessageType.EventType)), eventAction);
 		}
 
 		/// <summary>
@@ -25,11 +42,6 @@ namespace CommandProcessor.Buffer.UnitTests
 			if (Echo != null)
 				Echo(this, new EchoEventArgs(echoEvent.Payload));
 		}
-
-		/// <summary>
-		/// Occurs when [echo].
-		/// </summary>
-		public event EventHandler<EchoEventArgs> Echo;
 
 		/// <summary>
 		/// Pushes the command without response asynchronous.

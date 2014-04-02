@@ -91,8 +91,8 @@ namespace Veldy.Net.CommandProcessor
 		/// <param name="exception">The exception.</param>
 		public void SetException(Exception exception)
 		{
-			SetInactive();
 			Exception = exception;
+			SetInactive();
 		}
 
 		/// <summary>

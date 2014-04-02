@@ -30,7 +30,7 @@ namespace Veldy.Net.CommandProcessor
 		private Thread _commandProcessingThread;
 		private bool _disposed;
 		private const ThreadPriority DefaultCommunicationThreadPriority = ThreadPriority.AboveNormal;
-		private const int DefaultCommandTimeout = 10000;
+		private const int DefaultCommandTimeout = 1000;
 		private const int DefaultCommandWait = 100;
 
 		/// <summary>
@@ -96,8 +96,7 @@ namespace Veldy.Net.CommandProcessor
 		{
 			// create the transaction
 			var transaction =
-				new CommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore, TRsp>, TRsp>(
-					command, CommandTimeout);
+				new CommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore, TRsp>, TRsp>(command, CommandTimeout);
 
 			try
 			{
@@ -113,19 +112,26 @@ namespace Veldy.Net.CommandProcessor
 				// wait for the background worker to process the command
 				var signaled = transaction.ResetEvent.WaitOne(CommandTimeout);
 				if (!signaled)
+				{
+					lock(transaction)
+						transaction.SetInactive();
+
 					throw new TimeoutException();
+				}
 
 				// if there was an exception on the background thread, throw it here
 				if (transaction.Exception != null)
 					throw transaction.Exception;
 
+				Debug.Assert(transaction.Response != null);
 				return transaction.Response;
 			}
 			finally
 			{
 				lock (_CommandLock)
 				{
-					transaction.Dispose();
+					lock(transaction)
+						transaction.Dispose();
 				}
 			}
 		}
