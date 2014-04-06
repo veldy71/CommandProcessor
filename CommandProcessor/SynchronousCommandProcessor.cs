@@ -12,7 +12,8 @@ namespace Veldy.Net.CommandProcessor
 	/// <typeparam name="TCommandWithResponse">The type of the t command with response.</typeparam>
 	/// <typeparam name="TResponse">The type of the t response.</typeparam>
 	public abstract class SynchronousCommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>
-		: CommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>
+		: CommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>, 
+		ISynchronousCommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>
 		where TIdentifier : struct, IConvertible, IComparable<TStore>
 		where TStore : class
 		where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>

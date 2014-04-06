@@ -10,7 +10,7 @@ namespace Veldy.Net.CommandProcessor
 	/// <typeparam name="TStore">The type of the t store.</typeparam>
 	/// <typeparam name="TCommandWithResponse">The type of the t command with response.</typeparam>
 	/// <typeparam name="TResponse">The type of the t response.</typeparam>
-	public class CommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>
+	class CommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>
 		: CommandTransaction<TIdentifier, TStore, TCommandWithResponse>,
 			ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>
 		where TIdentifier : struct, IConvertible, IComparable<TStore>

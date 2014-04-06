@@ -9,7 +9,7 @@ namespace Veldy.Net.CommandProcessor
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
 	/// <typeparam name="TStore">The type of the t store.</typeparam>
 	/// <typeparam name="TCommand">The type of the t command.</typeparam>
-	public class CommandTransaction<TIdentifier, TStore, TCommand>
+	class CommandTransaction<TIdentifier, TStore, TCommand>
 		: ICommandTransaction<TIdentifier, TStore, TCommand>
 		where TCommand : class, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TIdentifier : struct, IConvertible, IComparable<TStore>
