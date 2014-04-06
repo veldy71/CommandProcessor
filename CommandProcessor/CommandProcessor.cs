@@ -28,7 +28,6 @@ namespace Veldy.Net.CommandProcessor
 		protected readonly AutoResetEvent _ProcessCommandsResetEvent = new AutoResetEvent(false);
 		private readonly Stopwatch _timeoutStopwatch = new Stopwatch();
 		private Thread _commandProcessingThread;
-		private bool _disposed;
 		private const ThreadPriority DefaultCommunicationThreadPriority = ThreadPriority.AboveNormal;
 		private const int DefaultCommandTimeout = 1000;
 		private const int DefaultCommandWait = 100;
@@ -39,7 +38,14 @@ namespace Veldy.Net.CommandProcessor
 		protected CommandProcessor()
 		{
 			IsProcessingCommands = false;
+			IsDisposed = false;
 		}
+
+		/// <summary>
+		/// Gets a value indicating whether this instance is disposed.
+		/// </summary>
+		/// <value><c>true</c> if this instance is disposed; otherwise, <c>false</c>.</value>
+		protected bool IsDisposed { get; private set; }
 
 		/// <summary>
 		///     Gets the communication thread priority.
@@ -227,7 +233,7 @@ namespace Veldy.Net.CommandProcessor
 		/// </param>
 		protected virtual void Dispose(bool disposing)
 		{
-			if (!_disposed)
+			if (!IsDisposed)
 			{
 				if (disposing)
 				{
@@ -238,7 +244,7 @@ namespace Veldy.Net.CommandProcessor
 				if (IsProcessingCommands)
 					StopProcessing();
 
-				_disposed = true;
+				IsDisposed = true;
 			}
 		}
 

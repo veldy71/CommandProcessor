@@ -8,7 +8,7 @@ namespace Veldy.Net.CommandProcessor
 	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
 	/// <typeparam name="TStore">The type of the t store.</typeparam>
 	/// <typeparam name="TEvent">The type of the t event.</typeparam>
-	internal class EventAction<TIdentifier, TStore, TEvent> : IEventAction<TIdentifier, TStore, TEvent>
+	internal class EventAction<TIdentifier, TStore, TEvent> : IEventAction<TIdentifier, TStore>
 		where TEvent : class, IEvent<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 		where TIdentifier : struct, IConvertible, IComparable<TStore>
 		where TStore : class
@@ -53,47 +53,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <param name="store">The store.</param>
 		/// <param name="handled">if set to <c>true</c> [handled].</param>
 		/// <returns>IEvent{`0`1}.</returns>
-		IEvent<TIdentifier, TStore> IEventAction<TIdentifier, TStore>.HandleEvent(TStore store, ref bool handled)
-		{
-			return HandleEventByType(store, ref handled);
-		}
-
-		/// <summary>
-		///     Handles the event.
-		/// </summary>
-		/// <param name="store">The store.</param>
-		/// <param name="handled">if set to <c>true</c> [handled].</param>
-		/// <returns>`2.</returns>
-		TEvent IEventAction<TIdentifier, TStore, TEvent>.HandleEvent(TStore store, ref bool handled)
-		{
-			return HandleEventByType(store, ref handled);
-		}
-
-		/// <summary>
-		///     Invokes the specified evt.
-		/// </summary>
-		/// <param name="evt">The evt.</param>
-		void IEventAction<TIdentifier, TStore, TEvent>.Invoke(TEvent evt)
-		{
-			_action(evt);
-		}
-
-		/// <summary>
-		///     Invokes the specified evt.
-		/// </summary>
-		/// <param name="evt">The evt.</param>
-		void IEventAction<TIdentifier, TStore>.Invoke(IEvent<TIdentifier, TStore> evt)
-		{
-			_action((TEvent) evt);
-		}
-
-		/// <summary>
-		///     Handles the type of the event by.
-		/// </summary>
-		/// <param name="store">The store.</param>
-		/// <param name="handled">if set to <c>true</c> [handled].</param>
-		/// <returns>`2.</returns>
-		private TEvent HandleEventByType(TStore store, ref bool handled)
+		public IEvent<TIdentifier, TStore> HandleEvent(TStore store, ref bool handled)
 		{
 			if (!handled)
 			{
@@ -113,6 +73,15 @@ namespace Veldy.Net.CommandProcessor
 			}
 
 			return null;
+		}
+
+		/// <summary>
+		///     Invokes the specified evt.
+		/// </summary>
+		/// <param name="evt">The evt.</param>
+		public void Invoke(IEvent<TIdentifier, TStore> evt)
+		{
+			_action((TEvent) evt);
 		}
 	}
 }
