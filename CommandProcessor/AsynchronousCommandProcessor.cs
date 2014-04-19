@@ -206,7 +206,7 @@ namespace Veldy.Net.CommandProcessor
 						foreach (var t in _commandsAwaitingResponse.ToList())
 						{
 							if (t.ResponseExpired)
-								lock(t)
+								lock (t)
 									t.SetInactive();
 
 							if (!t.IsActive)
@@ -217,42 +217,38 @@ namespace Veldy.Net.CommandProcessor
 					// process the transaction
 					if (transaction != null)
 					{
-						lock (transaction)
+						try
 						{
-							try
+							if (transaction.HasResponse)
 							{
-								if (transaction.HasResponse)
-								{
-									var commandWithResponseTransaction =
-										((ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>)
-											transaction);
+								var commandWithResponseTransaction =
+									((ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>)
+										transaction);
 
+								lock (_CommandLock)
+									commandWithResponseTransaction.SetWaitingForResponse();
+
+								var success = PushCommandWithResponseAsync(commandWithResponseTransaction.CommandWithResponse);
+								if (success)
+								{
 									lock (_CommandLock)
-										commandWithResponseTransaction.SetWaitingForResponse();
+										_commandsAwaitingResponse.Add(commandWithResponseTransaction);
 
-									var success = PushCommandWithResponseAsync(commandWithResponseTransaction.CommandWithResponse);
-									if (success)
-									{
-										lock (_CommandLock)
-											_commandsAwaitingResponse.Add(commandWithResponseTransaction);
-
-										_messageResetEvent.Set(); // let the message thread start work
-									}
-								}
-								else
-								{
-									if (PushCommandWithoutResponseAsynchronous(transaction.Command))
-										transaction.SetInactive();
+									_messageResetEvent.Set(); // let the message thread start work
 								}
 							}
-							catch (Exception e)
+							else
 							{
-								transaction.SetException(e);
+								if (PushCommandWithoutResponseAsynchronous(transaction.Command))
+									transaction.SetInactive();
 							}
 						}
+						catch (Exception e)
+						{
+							transaction.SetException(e);
+						}
 					}
-				} 
-				while (transaction != null);
+				} while (transaction != null);
 			}
 		}
 
@@ -281,20 +277,24 @@ namespace Veldy.Net.CommandProcessor
 
 					var handled = false;
 
+					IEnumerable<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>> commandsAwaitingResponse;
 					lock (_CommandLock)
 					{
-						foreach (var commandWithResponse in _commandsAwaitingResponse.Where(t => t.WaitingForResponse && t.IsActive))
+						commandsAwaitingResponse = _commandsAwaitingResponse.Where(t => t.WaitingForResponse && t.IsActive);
+					}
+					foreach (var commandWithResponse in _commandsAwaitingResponse.Where(t => t.WaitingForResponse && t.IsActive))
+					{
+						lock (_CommandLock)
 						{
-
 							if (commandWithResponse.SetResponseStore(message))
 							{
 								handled = true;
 								_commandsAwaitingResponse.Remove(commandWithResponse);
 							}
-
-							if (handled)
-								break;
 						}
+
+						if (handled)
+							break;
 					}
 
 					if (handled)

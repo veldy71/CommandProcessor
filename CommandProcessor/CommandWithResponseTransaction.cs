@@ -21,6 +21,11 @@ namespace Veldy.Net.CommandProcessor
 	{
 		private readonly long _timeout;
 		private bool _waitingForResponse = false;
+		private static Stopwatch _stopwatch = null;
+
+		private readonly ICommandWithResponse<TIdentifier, TStore> _commandWithResponse;
+		private TResponse _response = null;
+		private long _awaitingResponseSinceTimestamp = long.MinValue; // defaults to not waiting
 
 		/// <summary>
 		///     Initializes a new instance of the
@@ -31,14 +36,12 @@ namespace Veldy.Net.CommandProcessor
 		public CommandWithResponseTransaction(TCommandWithResponse command, long timeout)
 			: base(command)
 		{
-			CommandWithResponse = command;
+			_commandWithResponse = command;
 
 			if (timeout < 1)
 				throw new ArgumentOutOfRangeException("timeout");
 
 			_timeout = timeout;
-
-			AwaitingResponseSinceTimestamp = long.MinValue; // defaults to not waiting
 		}
 
 		/// <summary>
@@ -46,18 +49,12 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		static CommandWithResponseTransaction()
 		{
-			if (TimeoutStopWatch == null)
+			if (_stopwatch == null)
 			{
-				TimeoutStopWatch = new Stopwatch();
-				TimeoutStopWatch.Start();
+				_stopwatch = new Stopwatch();
+				_stopwatch.Start();
 			}
 		}
-
-		/// <summary>
-		///     Gets the timeout stop watch.
-		/// </summary>
-		/// <value>The timeout stop watch.</value>
-		private static Stopwatch TimeoutStopWatch { get; set; }
 
 		/// <summary>
 		///     Gets the command with response.
@@ -65,7 +62,14 @@ namespace Veldy.Net.CommandProcessor
 		/// <value>
 		///     The command with response.
 		/// </value>
-		public ICommandWithResponse<TIdentifier, TStore> CommandWithResponse { get; private set; }
+		public ICommandWithResponse<TIdentifier, TStore> CommandWithResponse
+		{
+			get
+			{
+				lock (_TransactionLock)
+					return _commandWithResponse;
+			}
+		}
 
 		/// <summary>
 		///     Gets the response.
@@ -73,7 +77,14 @@ namespace Veldy.Net.CommandProcessor
 		/// <value>
 		///     The response.
 		/// </value>
-		public TResponse Response { get; private set; }
+		public TResponse Response
+		{
+			get
+			{
+				lock (_TransactionLock)
+					return _response;
+			}
+		}
 
 		/// <summary>
 		///     Gets a value indicating whether [has response].
@@ -91,8 +102,11 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		public override void SetInactive()
 		{
-			AwaitingResponseSinceTimestamp = long.MinValue;
-			base.SetInactive();
+			lock (_TransactionLock)
+			{
+				_awaitingResponseSinceTimestamp = long.MinValue;
+				base.SetInactive();
+			}
 		}
 
 		/// <summary>
@@ -103,7 +117,8 @@ namespace Veldy.Net.CommandProcessor
 		{
 			get
 			{
-				return WaitingForResponse && (TimeoutStopWatch.ElapsedMilliseconds - AwaitingResponseSinceTimestamp) > _timeout;
+				lock(_TransactionLock)
+					return WaitingForResponse && (_stopwatch.ElapsedMilliseconds - _awaitingResponseSinceTimestamp) > _timeout;
 			}
 		}
 
@@ -114,25 +129,35 @@ namespace Veldy.Net.CommandProcessor
 		/// <returns></returns>
 		public bool SetResponseStore(TStore store)
 		{
-			var response = ((ICommandWithResponse<TIdentifier, TStore, TResponse>)CommandWithResponse).CreateResponse();
-
-			if (response.Key.CompareTo(store) == 0)
+			lock (_TransactionLock)
 			{
-				Response = response;
-				Response.SetStore(store);
-				SetInactive();
+				var response = ((ICommandWithResponse<TIdentifier, TStore, TResponse>) CommandWithResponse).CreateResponse();
 
-				return true;
+				if (response.Key.CompareTo(store) == 0)
+				{
+					_response = response;
+					_response.SetStore(store);
+					SetInactive();
+
+					return true;
+				}
+
+				return false;
 			}
-
-			return false;
 		}
 
 		/// <summary>
 		///     Gets a value indicating whether [waiting for response].
 		/// </summary>
 		/// <value><c>true</c> if [waiting for response]; otherwise, <c>false</c>.</value>
-		public bool WaitingForResponse { get { return _waitingForResponse && IsActive && Response == null; } }
+		public bool WaitingForResponse
+		{
+			get
+			{
+				lock (_TransactionLock)
+					return _waitingForResponse && IsActive && Response == null;
+			}
+		}
 
 		/// <summary>
 		///     Sets the waiting for response.
@@ -141,10 +166,11 @@ namespace Veldy.Net.CommandProcessor
 		{
 			if (Response == null)
 			{
-				var elapsedTime = TimeoutStopWatch.ElapsedMilliseconds;
-
-				AwaitingResponseSinceTimestamp = TimeoutStopWatch.ElapsedMilliseconds;
-				_waitingForResponse = true;
+				lock (_TransactionLock)
+				{
+					_awaitingResponseSinceTimestamp = _stopwatch.ElapsedMilliseconds;
+					_waitingForResponse = true;
+				}
 			}
 		}
 
@@ -152,6 +178,12 @@ namespace Veldy.Net.CommandProcessor
 		///     Gets the awaiting response since timestamp.
 		/// </summary>
 		/// <value>The awaiting response since timestamp.</value>
-		public long AwaitingResponseSinceTimestamp { get; private set; }
+		private long AwaitingResponseSinceTimestamp
+		{
+			get
+			{
+				return _awaitingResponseSinceTimestamp;
+			}
+		}
 	}
 }

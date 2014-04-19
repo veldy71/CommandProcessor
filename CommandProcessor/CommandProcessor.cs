@@ -136,8 +136,7 @@ namespace Veldy.Net.CommandProcessor
 			{
 				lock (_CommandLock)
 				{
-					lock(transaction)
-						transaction.Dispose();
+					transaction.Dispose();
 				}
 			}
 		}

@@ -17,6 +17,15 @@ namespace CommandProcessor.Buffer.UnitTests
 		}
 
 		/// <summary>
+		/// Gets the command timeout.
+		/// </summary>
+		/// <value>The command timeout.</value>
+		public override int CommandTimeout
+		{
+			get { return 360000 /* 1 hour for debugging purposes */; }
+		}
+
+		/// <summary>
 		/// Occurs when [echo].
 		/// </summary>
 		public event EventHandler<EchoEventArgs> Echo;

@@ -16,6 +16,12 @@ namespace Veldy.Net.CommandProcessor
 		where TStore : class
 	{
 		private bool _disposed = false;
+		protected readonly object _TransactionLock = new object();
+
+		private readonly TCommand _command;
+		private bool _isActive = true;
+		private ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
+		private Exception _exception = null;
 
 		/// <summary>
 		///     Initializes a new instance of the <see cref="CommandTransaction{TIdentifier, TStore, TCommand}" /> class.
@@ -27,10 +33,7 @@ namespace Veldy.Net.CommandProcessor
 			if (command == null)
 				throw new ArgumentNullException("command");
 
-			Command = command;
-			IsActive = true;
-			Exception = null;
-			ResetEvent = new ManualResetEvent(false);
+			_command = command;
 		}
 
 		/// <summary>
@@ -39,7 +42,14 @@ namespace Veldy.Net.CommandProcessor
 		/// <value>
 		///     The command.
 		/// </value>
-		public TCommand Command { get; private set; }
+		public TCommand Command
+		{
+			get
+			{
+				lock(_TransactionLock)
+					return _command;	
+			}
+		}
 
 		/// <summary>
 		///     Gets a value indicating whether [is active].
@@ -47,7 +57,14 @@ namespace Veldy.Net.CommandProcessor
 		/// <value>
 		///     <c>true</c> if [is active]; otherwise, <c>false</c>.
 		/// </value>
-		public bool IsActive { get; protected set; }
+		public bool IsActive
+		{
+			get
+			{
+				lock (_TransactionLock)
+					return _isActive;
+			}
+		}
 
 		/// <summary>
 		///     Gets the reset event.
@@ -55,7 +72,13 @@ namespace Veldy.Net.CommandProcessor
 		/// <value>
 		///     The reset event.
 		/// </value>
-		public ManualResetEvent ResetEvent { get; private set; }
+		public ManualResetEvent ResetEvent
+		{
+			get
+			{
+				return _manualResetEvent;
+			}
+		}
 
 		/// <summary>
 		///     Gets the exception.
@@ -63,7 +86,14 @@ namespace Veldy.Net.CommandProcessor
 		/// <value>
 		///     The exception.
 		/// </value>
-		public Exception Exception { get; private set; }
+		public Exception Exception
+		{
+			get
+			{
+				lock (_TransactionLock)
+					return _exception;
+			}
+		}
 
 		/// <summary>
 		///     Gets a value indicating whether [has response].
@@ -81,8 +111,11 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		public virtual void SetInactive()
 		{
-			IsActive = false;
-			ResetEvent.Set();
+			lock (_TransactionLock)
+			{
+				_isActive = false;
+				ResetEvent.Set();
+			}
 		}
 
 		/// <summary>
@@ -91,8 +124,11 @@ namespace Veldy.Net.CommandProcessor
 		/// <param name="exception">The exception.</param>
 		public void SetException(Exception exception)
 		{
-			Exception = exception;
-			SetInactive();
+			lock (_TransactionLock)
+			{
+				_exception = exception;
+				SetInactive();
+			}
 		}
 
 		/// <summary>
@@ -100,8 +136,8 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		public void Dispose()
 		{
-			GC.SuppressFinalize(this);
 			Dispose(true);
+			GC.SuppressFinalize(this);
 		}
 
 		/// <summary>
@@ -119,16 +155,19 @@ namespace Veldy.Net.CommandProcessor
 		///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
 		///     unmanaged resources.
 		/// </param>
-		private void Dispose(bool disposing)
+		protected virtual void Dispose(bool disposing)
 		{
 			if (!_disposed)
 			{
 				if (disposing)
 				{
-					if (ResetEvent != null)
+					lock (_TransactionLock)
 					{
-						ResetEvent.Dispose();
-						ResetEvent = null;
+						if (_manualResetEvent != null)
+						{
+							_manualResetEvent.Dispose();
+							_manualResetEvent = null;
+						}
 					}
 				}
 

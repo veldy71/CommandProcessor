@@ -40,7 +40,7 @@ namespace CommandProcessor.Buffer.UnitTests
 				Assert.IsInstanceOfType(echoResponse, typeof(EchoResponse));
 				Assert.IsTrue(BufferCompare(payload, echoResponse.Payload));
 
-				var handled = echoResetEvent.WaitOne(10000); // wait up to ten seconds for the event
+				var handled = echoResetEvent.WaitOne(commandProcessor.CommandTimeout + commandProcessor.EventWait); 
 				Assert.IsTrue(handled, "The echo event never fired.");
 				Assert.IsTrue(BufferCompare(payload, echoEventPayload));
 				
