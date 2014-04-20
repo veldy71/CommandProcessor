@@ -14,12 +14,6 @@ namespace Veldy.Net.CommandProcessor
 		bool WaitingForResponse { get; }
 
 		/// <summary>
-		/// Gets a value indicating whether [response expired].
-		/// </summary>
-		/// <value><c>true</c> if [response expired]; otherwise, <c>false</c>.</value>
-		bool ResponseExpired { get; }
-
-		/// <summary>
 		///     Sets the response store.
 		/// </summary>
 		/// <param name="store">The store.</param>

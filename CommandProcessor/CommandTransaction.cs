@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Concurrent;
+using System.Linq;
 using System.Threading;
 
 namespace Veldy.Net.CommandProcessor
@@ -20,20 +22,56 @@ namespace Veldy.Net.CommandProcessor
 
 		private readonly TCommand _command;
 		private bool _isActive = true;
-		private ManualResetEvent _manualResetEvent = new ManualResetEvent(false);
+		private readonly AutoResetEvent _resetEvent;
 		private Exception _exception = null;
 
+		private static readonly ConcurrentStack<AutoResetEvent> _resetEvents = new ConcurrentStack<AutoResetEvent>();
+
 		/// <summary>
-		///     Initializes a new instance of the <see cref="CommandTransaction{TIdentifier, TStore, TCommand}" /> class.
+		/// Initializes a new instance of the <see cref="CommandTransaction{TIdentifier, TStore, TCommand}" /> class.
 		/// </summary>
 		/// <param name="command">The command.</param>
+		/// <param name="resetEvent">The reset event.</param>
 		/// <exception cref="System.ArgumentNullException">command</exception>
-		public CommandTransaction(TCommand command)
+		protected CommandTransaction(TCommand command, AutoResetEvent resetEvent)
 		{
 			if (command == null)
 				throw new ArgumentNullException("command");
 
 			_command = command;
+			_resetEvent = resetEvent;
+		}
+
+		/// <summary>
+		/// Creates the specified command.
+		/// </summary>
+		/// <param name="command">The command.</param>
+		/// <returns>ICommandTransaction&lt;TIdentifier, TStore, TCommand&gt;.</returns>
+		public static ICommandTransaction<TIdentifier, TStore, TCommand> Create(TCommand command)
+		{
+			return new CommandTransaction<TIdentifier, TStore, TCommand>(command, AcquireResetEvent());
+		}
+
+		/// <summary>
+		/// Acquires the reset event.
+		/// </summary>
+		/// <returns>AutoResetEvent.</returns>
+		protected static AutoResetEvent AcquireResetEvent()
+		{
+			AutoResetEvent resetEvent;
+			if (_resetEvents.Any() && _resetEvents.TryPop(out resetEvent))
+				return resetEvent;
+			else
+				return new AutoResetEvent(false);
+		}
+
+		/// <summary>
+		/// Releases the reset event.
+		/// </summary>
+		/// <param name="resetEvent">The reset event.</param>
+		protected static void ReleaseResetEvent(AutoResetEvent resetEvent)
+		{
+			_resetEvents.Push(resetEvent);
 		}
 
 		/// <summary>
@@ -72,11 +110,11 @@ namespace Veldy.Net.CommandProcessor
 		/// <value>
 		///     The reset event.
 		/// </value>
-		public ManualResetEvent ResetEvent
+		public WaitHandle ResetEvent
 		{
 			get
 			{
-				return _manualResetEvent;
+				return _resetEvent;
 			}
 		}
 
@@ -114,7 +152,7 @@ namespace Veldy.Net.CommandProcessor
 			lock (_TransactionLock)
 			{
 				_isActive = false;
-				ResetEvent.Set();
+				_resetEvent.Set();
 			}
 		}
 
@@ -162,13 +200,7 @@ namespace Veldy.Net.CommandProcessor
 				if (disposing)
 				{
 					lock (_TransactionLock)
-					{
-						if (_manualResetEvent != null)
-						{
-							_manualResetEvent.Dispose();
-							_manualResetEvent = null;
-						}
-					}
+						ReleaseResetEvent(_resetEvent);
 				}
 
 				_disposed = true;

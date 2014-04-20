@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -27,10 +28,6 @@ namespace Veldy.Net.CommandProcessor
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 		where TEvent : class, IEvent<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 	{
-		private readonly
-			List<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>> _commandsAwaitingResponse
-				= new List<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>>();
-
 		private readonly List<IEventAction<TIdentifier, TStore>> _eventActions = new List<IEventAction<TIdentifier, TStore>>();
 		private readonly object _eventLock = new object();
 
@@ -50,6 +47,8 @@ namespace Veldy.Net.CommandProcessor
 
 		private const int DefaultMessageWait = 1000;
 		private const int DefaultEventWait = 1000;
+
+		private readonly ConcurrentQueue<ICommandTransaction<TIdentifier, TStore, TCommand>> _commandTransactions = new ConcurrentQueue<ICommandTransaction<TIdentifier, TStore, TCommand>>();
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AsynchronousCommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse, TEvent}"/> class.
@@ -188,68 +187,7 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		protected override void ProcessCommands()
 		{
-			while (IsProcessingCommands)
-			{
-				_ProcessCommandsResetEvent.WaitOne(CommandWait);
-
-				ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>> transaction;
-
-				do
-				{
-					transaction = null;
-
-					lock (_CommandLock)
-					{
-						if (_CommandQueue.Any())
-							transaction = _CommandQueue.Dequeue();
-
-						foreach (var t in _commandsAwaitingResponse.ToList())
-						{
-							if (t.ResponseExpired)
-								lock (t)
-									t.SetInactive();
-
-							if (!t.IsActive)
-								_commandsAwaitingResponse.Remove(t);
-						}
-					}
-
-					// process the transaction
-					if (transaction != null)
-					{
-						try
-						{
-							if (transaction.HasResponse)
-							{
-								var commandWithResponseTransaction =
-									((ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>)
-										transaction);
-
-								lock (_CommandLock)
-									commandWithResponseTransaction.SetWaitingForResponse();
-
-								var success = PushCommandWithResponseAsync(commandWithResponseTransaction.CommandWithResponse);
-								if (success)
-								{
-									lock (_CommandLock)
-										_commandsAwaitingResponse.Add(commandWithResponseTransaction);
-
-									_messageResetEvent.Set(); // let the message thread start work
-								}
-							}
-							else
-							{
-								if (PushCommandWithoutResponseAsynchronous(transaction.Command))
-									transaction.SetInactive();
-							}
-						}
-						catch (Exception e)
-						{
-							transaction.SetException(e);
-						}
-					}
-				} while (transaction != null);
-			}
+			
 		}
 
 		/// <summary>
@@ -277,25 +215,7 @@ namespace Veldy.Net.CommandProcessor
 
 					var handled = false;
 
-					IEnumerable<ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>> commandsAwaitingResponse;
-					lock (_CommandLock)
-					{
-						commandsAwaitingResponse = _commandsAwaitingResponse.Where(t => t.WaitingForResponse && t.IsActive);
-					}
-					foreach (var commandWithResponse in _commandsAwaitingResponse.Where(t => t.WaitingForResponse && t.IsActive))
-					{
-						lock (_CommandLock)
-						{
-							if (commandWithResponse.SetResponseStore(message))
-							{
-								handled = true;
-								_commandsAwaitingResponse.Remove(commandWithResponse);
-							}
-						}
-
-						if (handled)
-							break;
-					}
+					// TODO -- process command responses
 
 					if (handled)
 						continue;

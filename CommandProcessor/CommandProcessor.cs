@@ -102,7 +102,7 @@ namespace Veldy.Net.CommandProcessor
 		{
 			// create the transaction
 			var transaction =
-				new CommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore, TRsp>, TRsp>(command, CommandTimeout);
+				CommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore, TRsp>, TRsp>.Create(command);
 
 			try
 			{
@@ -149,7 +149,7 @@ namespace Veldy.Net.CommandProcessor
 		public void SendCommand(TCommand command)
 		{
 			// create the transaction
-			var transaction = new CommandTransaction<TIdentifier, TStore, TCommand>(command);
+			var transaction = CommandTransaction<TIdentifier, TStore, TCommand>.Create(command);
 
 			try
 			{

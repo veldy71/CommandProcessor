@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Diagnostics;
+using System.Threading;
 
 namespace Veldy.Net.CommandProcessor
 {
@@ -19,41 +19,32 @@ namespace Veldy.Net.CommandProcessor
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 		where TStore : class
 	{
-		private readonly long _timeout;
-		private bool _waitingForResponse = false;
-		private static Stopwatch _stopwatch = null;
-
 		private readonly ICommandWithResponse<TIdentifier, TStore> _commandWithResponse;
 		private TResponse _response = null;
-		private long _awaitingResponseSinceTimestamp = long.MinValue; // defaults to not waiting
+		private bool _waitingForResponse = false;
 
 		/// <summary>
-		///     Initializes a new instance of the
-		///     <see cref="CommandWithResponseTransaction{TIdentifier, TStore, TCommand, TResponse}" /> class.
+		/// Initializes a new instance of the
+		/// <see cref="CommandWithResponseTransaction{TIdentifier, TStore, TCommand, TResponse}" /> class.
 		/// </summary>
 		/// <param name="command">The command.</param>
-		/// <param name="timeout">The timeout.</param>
-		public CommandWithResponseTransaction(TCommandWithResponse command, long timeout)
-			: base(command)
+		/// <param name="resetEvent">The reset event.</param>
+		private CommandWithResponseTransaction(TCommandWithResponse command, AutoResetEvent resetEvent)
+			: base(command, resetEvent)
 		{
 			_commandWithResponse = command;
 
-			if (timeout < 1)
-				throw new ArgumentOutOfRangeException("timeout");
-
-			_timeout = timeout;
 		}
 
 		/// <summary>
-		/// Initializes static members of the <see cref="CommandWithResponseTransaction{TIdentifier, TStore, TCommandWithResponse, TResponse}"/> class.
+		/// Creates the specified command with response.
 		/// </summary>
-		static CommandWithResponseTransaction()
+		/// <param name="commandWithResponse">The command with response.</param>
+		/// <returns>ICommandWithResponseTransaction&lt;TIdentifier, TStore, TCommandWithResponse&gt;.</returns>
+		public static new ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse> Create(
+			TCommandWithResponse commandWithResponse)
 		{
-			if (_stopwatch == null)
-			{
-				_stopwatch = new Stopwatch();
-				_stopwatch.Start();
-			}
+			return new CommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>(commandWithResponse, AcquireResetEvent());
 		}
 
 		/// <summary>
@@ -95,31 +86,6 @@ namespace Veldy.Net.CommandProcessor
 		public override bool HasResponse
 		{
 			get { return true; }
-		}
-
-		/// <summary>
-		/// Sets the inactive.
-		/// </summary>
-		public override void SetInactive()
-		{
-			lock (_TransactionLock)
-			{
-				_awaitingResponseSinceTimestamp = long.MinValue;
-				base.SetInactive();
-			}
-		}
-
-		/// <summary>
-		/// Gets a value indicating whether [response expired].
-		/// </summary>
-		/// <value><c>true</c> if [response expired]; otherwise, <c>false</c>.</value>
-		public bool ResponseExpired
-		{
-			get
-			{
-				lock(_TransactionLock)
-					return WaitingForResponse && (_stopwatch.ElapsedMilliseconds - _awaitingResponseSinceTimestamp) > _timeout;
-			}
 		}
 
 		/// <summary>
@@ -167,22 +133,7 @@ namespace Veldy.Net.CommandProcessor
 			if (Response == null)
 			{
 				lock (_TransactionLock)
-				{
-					_awaitingResponseSinceTimestamp = _stopwatch.ElapsedMilliseconds;
 					_waitingForResponse = true;
-				}
-			}
-		}
-
-		/// <summary>
-		///     Gets the awaiting response since timestamp.
-		/// </summary>
-		/// <value>The awaiting response since timestamp.</value>
-		private long AwaitingResponseSinceTimestamp
-		{
-			get
-			{
-				return _awaitingResponseSinceTimestamp;
 			}
 		}
 	}

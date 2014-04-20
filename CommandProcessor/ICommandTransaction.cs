@@ -24,7 +24,7 @@ namespace Veldy.Net.CommandProcessor
 		/// <value>
 		///     The reset event.
 		/// </value>
-		ManualResetEvent ResetEvent { get; }
+		WaitHandle ResetEvent { get; }
 
 		/// <summary>
 		///     Gets the exception.
