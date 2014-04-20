@@ -14,14 +14,12 @@ namespace Veldy.Net.CommandProcessor
 		: CommandTransaction<TIdentifier, TStore, TCommandWithResponse>,
 			ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse, TResponse>
 		where TIdentifier : struct, IConvertible, IComparable<TStore>
-		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommandWithResponse<TIdentifier, TStore>,
-			ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
+		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore>, ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 		where TStore : class
 	{
-		private readonly ICommandWithResponse<TIdentifier, TStore> _commandWithResponse;
+		private readonly TCommandWithResponse _commandWithResponse;
 		private TResponse _response = null;
-		private bool _waitingForResponse = false;
 
 		/// <summary>
 		/// Initializes a new instance of the
@@ -109,31 +107,6 @@ namespace Veldy.Net.CommandProcessor
 				}
 
 				return false;
-			}
-		}
-
-		/// <summary>
-		///     Gets a value indicating whether [waiting for response].
-		/// </summary>
-		/// <value><c>true</c> if [waiting for response]; otherwise, <c>false</c>.</value>
-		public bool WaitingForResponse
-		{
-			get
-			{
-				lock (_TransactionLock)
-					return _waitingForResponse && IsActive && Response == null;
-			}
-		}
-
-		/// <summary>
-		///     Sets the waiting for response.
-		/// </summary>
-		public void SetWaitingForResponse()
-		{
-			if (Response == null)
-			{
-				lock (_TransactionLock)
-					_waitingForResponse = true;
 			}
 		}
 	}

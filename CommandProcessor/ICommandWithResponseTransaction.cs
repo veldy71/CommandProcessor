@@ -8,22 +8,12 @@ namespace Veldy.Net.CommandProcessor
 		where TStore : class
 	{
 		/// <summary>
-		///     Gets a value indicating whether [waiting for response].
-		/// </summary>
-		/// <value><c>true</c> if [waiting for response]; otherwise, <c>false</c>.</value>
-		bool WaitingForResponse { get; }
-
-		/// <summary>
 		///     Sets the response store.
 		/// </summary>
 		/// <param name="store">The store.</param>
 		/// <returns></returns>
 		bool SetResponseStore(TStore store);
 
-		/// <summary>
-		///     Sets the waiting for response.
-		/// </summary>
-		void SetWaitingForResponse();
 
 		/// <summary>
 		/// Gets the command with response.
@@ -42,7 +32,7 @@ namespace Veldy.Net.CommandProcessor
 	public interface ICommandWithResponseTransaction<TIdentifier, TStore, out TCommandWithResponse, out TResponse>
 		: ICommandWithResponseTransaction<TIdentifier, TStore, TCommandWithResponse>
 		where TIdentifier : struct, IConvertible, IComparable<TStore>
-		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore, TResponse>, ICommandWithResponse<TIdentifier, TStore>, ICommand<TIdentifier, TStore>,
+		where TCommandWithResponse : class, ICommandWithResponse<TIdentifier, TStore>, ICommand<TIdentifier, TStore>,
 			IMessage<TIdentifier, TStore>
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TStore : class

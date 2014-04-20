@@ -1,4 +1,6 @@
-﻿using System.Threading;
+﻿using System;
+using System.Diagnostics;
+using System.Threading;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace CommandProcessor.Buffer.UnitTests
@@ -12,18 +14,14 @@ namespace CommandProcessor.Buffer.UnitTests
 		[TestMethod]
 		public void AsynchronousCommandProcessorTest()
 		{
-			var payload = new byte[] { 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A };
+			const int iterations = 10;
+			var eventsFired = 0;
+			var responsePayloadsMatched = 0;
+			var eventPayloadsMatched = 0;
+
+			var random = new Random();
 
 			var commandProcessor = new AsynchronousCommandProcessor();
-
-			byte[] echoEventPayload = null;
-			var echoResetEvent = new ManualResetEvent(false);
-
-			commandProcessor.Echo += (sender, args) =>
-			{
-				echoEventPayload = args.Payload;
-				echoResetEvent.Set();
-			};
 
 			try
 			{
@@ -35,15 +33,33 @@ namespace CommandProcessor.Buffer.UnitTests
 				Assert.IsTrue(commandProcessor.IsProcessingMessages);
 				Assert.IsTrue(commandProcessor.IsProcessingEvents);
 
-				var echoResponse = commandProcessor.SendCommandWithResponse(new EchoCommand { Payload = payload });
-				Assert.IsNotNull(echoResponse);
-				Assert.IsInstanceOfType(echoResponse, typeof(EchoResponse));
-				Assert.IsTrue(BufferCompare(payload, echoResponse.Payload));
+				for (var iteration = 0; iteration < iterations; iteration++)
+				{
+					var payloadLength = random.Next(1, 255);
 
-				var handled = echoResetEvent.WaitOne(commandProcessor.CommandTimeout + commandProcessor.EventWait); 
-				Assert.IsTrue(handled, "The echo event never fired.");
-				Assert.IsTrue(BufferCompare(payload, echoEventPayload));
-				
+					var payload = new byte[payloadLength];
+					random.NextBytes(payload);
+
+					var echoResetEvent = new ManualResetEvent(false);
+
+					commandProcessor.Echo += (sender, args) =>
+					{
+						if (payloadLength == args.Payload.Length && BufferCompare(payload, args.Payload))
+							Interlocked.Increment(ref eventPayloadsMatched);
+
+						Interlocked.Increment(ref eventsFired);
+						echoResetEvent.Set();
+					};
+
+					var echoResponse = commandProcessor.SendCommandWithResponse(new EchoCommand {Payload = payload});
+					Assert.IsNotNull(echoResponse);
+					Assert.IsInstanceOfType(echoResponse, typeof (EchoResponse));
+					if (payloadLength == echoResponse.Payload.Length && BufferCompare(payload, echoResponse.Payload))
+						responsePayloadsMatched++;
+
+					echoResetEvent.WaitOne(commandProcessor.CommandTimeout + commandProcessor.EventWait);
+				}
+
 			}
 			finally
 			{
@@ -54,6 +70,15 @@ namespace CommandProcessor.Buffer.UnitTests
 				Assert.IsFalse(commandProcessor.IsProcessingCommands);
 				Assert.IsFalse(commandProcessor.IsProcessingMessages);
 				Assert.IsFalse(commandProcessor.IsProcessingEvents);
+
+				Debug.WriteLine("Iterations = " + iterations);
+				Debug.WriteLine("Events fired = " + eventsFired);
+				Debug.WriteLine("Events payloads matched = " + eventPayloadsMatched);
+				Debug.WriteLine("Response payloads matched = " + responsePayloadsMatched);
+
+				Assert.IsTrue(eventsFired == iterations);
+				Assert.IsTrue(eventPayloadsMatched == iterations);
+				Assert.IsTrue(responsePayloadsMatched == iterations);
 			}
 		}
 

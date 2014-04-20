@@ -32,11 +32,9 @@ namespace Veldy.Net.CommandProcessor
 
 				ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>> transaction = null;
 
-				lock (_CommandLock)
-				{
-					if (_CommandQueue.Any())
-						transaction = _CommandQueue.Dequeue();
-				}
+				if (_CommandQueue.Any())
+					if (!_CommandQueue.TryDequeue(out transaction))
+						transaction = null;
 
 				// process the transaction
 				if (transaction != null)
@@ -47,7 +45,7 @@ namespace Veldy.Net.CommandProcessor
 						{
 							var commandWithResponseTransaction = ((ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>) transaction);
 
-							TStore responseStore = PushCommandWithResponse(commandWithResponseTransaction.CommandWithResponse);
+							var responseStore = PushCommandWithResponse(commandWithResponseTransaction.CommandWithResponse);
 							commandWithResponseTransaction.SetResponseStore(responseStore);
 						}
 						else

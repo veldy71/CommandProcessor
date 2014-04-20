@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Threading;
@@ -22,9 +23,8 @@ namespace Veldy.Net.CommandProcessor
 			ICommand<TIdentifier, TStore>, IMessage<TIdentifier, TStore>
 		where TResponse : class, IResponse<TIdentifier, TStore>, IMessage<TIdentifier, TStore>, new()
 	{
-		protected readonly object _CommandLock = new object();
-		protected readonly Queue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>> _CommandQueue
-			= new Queue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>>();
+		protected readonly ConcurrentQueue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>> _CommandQueue
+			= new ConcurrentQueue<ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>>>();
 		protected readonly AutoResetEvent _ProcessCommandsResetEvent = new AutoResetEvent(false);
 		private readonly Stopwatch _timeoutStopwatch = new Stopwatch();
 		private Thread _commandProcessingThread;
@@ -32,20 +32,17 @@ namespace Veldy.Net.CommandProcessor
 		private const int DefaultCommandTimeout = 1000;
 		private const int DefaultCommandWait = 100;
 
+		protected readonly object _TransactionLock = new object();
+
+		private bool _disposed = false;
+
 		/// <summary>
 		/// Initializes a new instance of the <see cref="CommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse}"/> class.
 		/// </summary>
 		protected CommandProcessor()
 		{
 			IsProcessingCommands = false;
-			IsDisposed = false;
 		}
-
-		/// <summary>
-		/// Gets a value indicating whether this instance is disposed.
-		/// </summary>
-		/// <value><c>true</c> if this instance is disposed; otherwise, <c>false</c>.</value>
-		protected bool IsDisposed { get; private set; }
 
 		/// <summary>
 		///     Gets the communication thread priority.
@@ -102,24 +99,21 @@ namespace Veldy.Net.CommandProcessor
 		{
 			// create the transaction
 			var transaction =
-				CommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore, TRsp>, TRsp>.Create(command);
+				CommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>, TRsp>.Create(command);
 
 			try
 			{
-				lock (_CommandLock)
-				{
-					// enqueue it for processing
-					_CommandQueue.Enqueue(transaction);
+				// enqueue it for processing
+				_CommandQueue.Enqueue(transaction);
 
-					// let the processing thread know to do some work
-					_ProcessCommandsResetEvent.Set();
-				}
+				// let the processing thread know to do some work
+				_ProcessCommandsResetEvent.Set();
 
 				// wait for the background worker to process the command
 				var signaled = transaction.ResetEvent.WaitOne(CommandTimeout);
 				if (!signaled)
 				{
-					lock(transaction)
+					lock(_TransactionLock)
 						transaction.SetInactive();
 
 					throw new TimeoutException();
@@ -134,10 +128,8 @@ namespace Veldy.Net.CommandProcessor
 			}
 			finally
 			{
-				lock (_CommandLock)
-				{
+				lock(_TransactionLock)
 					transaction.Dispose();
-				}
 			}
 		}
 
@@ -153,14 +145,11 @@ namespace Veldy.Net.CommandProcessor
 
 			try
 			{
-				lock (_CommandLock)
-				{
-					// enqueue it for processing
-					_CommandQueue.Enqueue(transaction);
+				// enqueue it for processing
+				_CommandQueue.Enqueue(transaction);
 
-					// let the processing thread know to do some work
-					_ProcessCommandsResetEvent.Set();
-				}
+				// let the processing thread know to do some work
+				_ProcessCommandsResetEvent.Set();
 
 				bool signaled = transaction.ResetEvent.WaitOne(CommandTimeout);
 				if (!signaled)
@@ -172,10 +161,7 @@ namespace Veldy.Net.CommandProcessor
 			}
 			finally
 			{
-				lock (_CommandLock)
-				{
-					transaction.Dispose();
-				}
+				transaction.Dispose();
 			}
 		}
 
@@ -232,7 +218,7 @@ namespace Veldy.Net.CommandProcessor
 		/// </param>
 		protected virtual void Dispose(bool disposing)
 		{
-			if (!IsDisposed)
+			if (!_disposed)
 			{
 				if (disposing)
 				{
@@ -243,7 +229,7 @@ namespace Veldy.Net.CommandProcessor
 				if (IsProcessingCommands)
 					StopProcessing();
 
-				IsDisposed = true;
+				_disposed = true;
 			}
 		}
 

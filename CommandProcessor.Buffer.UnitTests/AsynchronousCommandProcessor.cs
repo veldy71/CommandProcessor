@@ -57,7 +57,7 @@ namespace CommandProcessor.Buffer.UnitTests
 		/// </summary>
 		/// <param name="command">The command.</param>
 		/// <returns><c>true</c> if XXXX, <c>false</c> otherwise.</returns>
-		protected override bool PushCommandWithoutResponseAsynchronous(ICommand<Identifier, byte[]> command)
+		protected override bool PushCommandWithoutResponseAsync(ICommand<Identifier, byte[]> command)
 		{
 			// TODO
 			return true;

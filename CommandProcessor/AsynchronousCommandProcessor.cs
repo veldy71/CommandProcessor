@@ -2,6 +2,7 @@
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 
@@ -31,13 +32,12 @@ namespace Veldy.Net.CommandProcessor
 		private readonly List<IEventAction<TIdentifier, TStore>> _eventActions = new List<IEventAction<TIdentifier, TStore>>();
 		private readonly object _eventLock = new object();
 
-		private readonly Queue<Tuple<IEventAction<TIdentifier, TStore>, TEvent>> _eventQueue =
-			new Queue<Tuple<IEventAction<TIdentifier, TStore>, TEvent>>();
+		private readonly ConcurrentQueue<Tuple<IEventAction<TIdentifier, TStore>, TEvent>> _eventQueue =
+			new ConcurrentQueue<Tuple<IEventAction<TIdentifier, TStore>, TEvent>>();
 
 		private readonly AutoResetEvent _eventResetEvent = new AutoResetEvent(false);
 
-		private readonly object _messageLock = new object();
-		private readonly Queue<TStore> _messageQueue = new Queue<TStore>();
+		private readonly ConcurrentQueue<TStore> _messageQueue = new ConcurrentQueue<TStore>();
 		private readonly AutoResetEvent _messageResetEvent = new AutoResetEvent(false);
 
 		private Thread _eventProcessingThread;
@@ -48,7 +48,8 @@ namespace Veldy.Net.CommandProcessor
 		private const int DefaultMessageWait = 1000;
 		private const int DefaultEventWait = 1000;
 
-		private readonly ConcurrentQueue<ICommandTransaction<TIdentifier, TStore, TCommand>> _commandTransactions = new ConcurrentQueue<ICommandTransaction<TIdentifier, TStore, TCommand>>();
+		private ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>
+			_currentCommandWithResponseTransaction = null;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="AsynchronousCommandProcessor{TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse, TEvent}"/> class.
@@ -161,11 +162,8 @@ namespace Veldy.Net.CommandProcessor
 			if (store == null)
 				throw new ArgumentNullException("store");
 
-			lock (_messageLock)
-			{
-				_messageQueue.Enqueue(store);
-				_messageResetEvent.Set();
-			}
+			_messageQueue.Enqueue(store);
+			_messageResetEvent.Set();
 		}
 
 		/// <summary>
@@ -173,7 +171,7 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		/// <param name="command">The command.</param>
 		/// <returns>System.Boolean.</returns>
-		protected abstract bool PushCommandWithoutResponseAsynchronous(ICommand<TIdentifier, TStore> command);
+		protected abstract bool PushCommandWithoutResponseAsync(ICommand<TIdentifier, TStore> command);
 
 		/// <summary>
 		///     Pushes the command with response asynchronous.
@@ -187,7 +185,47 @@ namespace Veldy.Net.CommandProcessor
 		/// </summary>
 		protected override void ProcessCommands()
 		{
-			
+			while (IsProcessingCommands)
+			{
+				_ProcessCommandsResetEvent.WaitOne(CommandWait);
+
+				while (_CommandQueue.Any())
+				{
+					// waiting on a response the previous transaction
+					lock (_TransactionLock)
+					{
+						if (_currentCommandWithResponseTransaction != null)
+							break;
+
+						ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>> commandTransaction = null;
+
+						if (!_CommandQueue.TryDequeue(out commandTransaction))
+							continue;
+
+						if (commandTransaction.HasResponse)
+						{
+							_currentCommandWithResponseTransaction =
+								(ICommandWithResponseTransaction<TIdentifier, TStore, ICommandWithResponse<TIdentifier, TStore>>)
+									commandTransaction;
+
+							if (PushCommandWithResponseAsync(_currentCommandWithResponseTransaction.CommandWithResponse))
+								_messageResetEvent.Set();
+							else
+							{
+								_currentCommandWithResponseTransaction.SetException(new IOException("Failed to push command for response."));
+								_currentCommandWithResponseTransaction = null;
+							}
+						}
+						else
+						{
+							if (PushCommandWithoutResponseAsync(commandTransaction.Command))
+								commandTransaction.SetInactive();
+							else
+								commandTransaction.SetException(new IOException("Failed to push command without response."));
+						}
+					}
+				}
+			}
 		}
 
 		/// <summary>
@@ -199,37 +237,35 @@ namespace Veldy.Net.CommandProcessor
 			{
 				_messageResetEvent.WaitOne(MessageWait);
 
-				TStore message;
-
-				do
+				while (_messageQueue.Any())
 				{
-					message = null;
-					lock (_messageLock)
-					{
-						if (_messageQueue.Any())
-							message = _messageQueue.Dequeue();
-					}
-
-					if (message == null)
+					TStore message;
+					if (!_messageQueue.TryDequeue(out message))
 						continue;
 
 					var handled = false;
 
-					// TODO -- process command responses
+					lock (_TransactionLock)
+					{
+						if (_currentCommandWithResponseTransaction != null
+						    && _currentCommandWithResponseTransaction.IsActive
+						    && _currentCommandWithResponseTransaction.SetResponseStore(message))
+						{
+							handled = true;
+							_currentCommandWithResponseTransaction = null;
+						}
+					}
 
 					if (handled)
 						continue;
 
-					lock (_eventLock)
+					var t = HandleEvent(message, ref handled);
+					if (handled)
 					{
-						var t = HandleEvent(message, ref handled);
-						if (t != null && handled)
-						{
-							// queue the event to fire
-							_eventQueue.Enqueue(t);
-						}
+						// queue the event to fire
+						_eventQueue.Enqueue(t);
 					}
-				} while (message != null && IsProcessingMessages);
+				}
 			}
 		}
 
@@ -269,21 +305,18 @@ namespace Veldy.Net.CommandProcessor
 			{
 				_eventResetEvent.WaitOne(EventWait);
 
-				IEventAction<TIdentifier, TStore> eventAction = null;
-				TEvent evt = null;
 
-				lock (_eventLock)
-				{
-					if (_eventQueue.Any())
-					{
-						var item = _eventQueue.Dequeue();
-						eventAction = item.Item1;
-						evt = item.Item2;
-					}
-				}
 
-				if (eventAction != null && evt != null)
+				while (_eventQueue.Any())
 				{
+					Tuple<IEventAction<TIdentifier, TStore>, TEvent> tuple;
+
+					if (!_eventQueue.TryDequeue(out tuple))
+						continue;
+
+					var eventAction = tuple.Item1;
+					var evt = tuple.Item2;
+
 					// fire off the event
 					eventAction.Invoke(evt);
 				}
