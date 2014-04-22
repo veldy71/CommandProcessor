@@ -35,8 +35,7 @@
   </ItemGroup>
   <Import Project="$(WixTargetsPath)" />
   <PropertyGroup>
-    <PostBuildEvent>mkdir $(SolutionDir)\Build\Deploy 
-xcopy $(TargetFileName) $(SolutionDir)\Build\Deploy /y</PostBuildEvent>
+    <PostBuildEvent>call $(SolutionDir)Deploy.bat $(TargetDir)$(TargetName) $(TargetExt) $(SolutionDir)Build\$(ConfigurationName)\Deploy\</PostBuildEvent>
   </PropertyGroup>
   <!--
 	To modify your build process, add your task inside one of the targets below and uncomment it.
