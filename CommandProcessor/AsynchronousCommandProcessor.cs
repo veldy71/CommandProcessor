@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Threading;
@@ -197,7 +196,7 @@ namespace Veldy.Net.CommandProcessor
 						if (_currentCommandWithResponseTransaction != null)
 							break;
 
-						ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>> commandTransaction = null;
+						ICommandTransaction<TIdentifier, TStore, ICommand<TIdentifier, TStore>> commandTransaction;
 
 						if (!_CommandQueue.TryDequeue(out commandTransaction))
 							continue;
@@ -256,15 +255,12 @@ namespace Veldy.Net.CommandProcessor
 						}
 					}
 
-					if (handled)
-						continue;
+					if (!handled)
+						handled = HandleEvent(message);
 
-					var t = HandleEvent(message, ref handled);
-					if (handled)
-					{
-						// queue the event to fire
-						_eventQueue.Enqueue(t);
-					}
+					if (!handled)
+						throw new MessageNotHandledException<TStore>(message);
+
 				}
 			}
 		}
@@ -289,11 +285,8 @@ namespace Veldy.Net.CommandProcessor
 		/// <param name="evt">The evt.</param>
 		private void QueueEvent(IEventAction<TIdentifier, TStore> action, TEvent evt)
 		{
-			lock (_eventQueue)
-			{
-				_eventQueue.Enqueue(new Tuple<IEventAction<TIdentifier, TStore>, TEvent>(action, evt));
-				_eventResetEvent.Set();
-			}
+			_eventQueue.Enqueue(new Tuple<IEventAction<TIdentifier, TStore>, TEvent>(action, evt));
+			_eventResetEvent.Set();
 		}
 
 		/// <summary>
@@ -304,8 +297,6 @@ namespace Veldy.Net.CommandProcessor
 			while (IsProcessingEvents)
 			{
 				_eventResetEvent.WaitOne(EventWait);
-
-
 
 				while (_eventQueue.Any())
 				{
@@ -324,21 +315,14 @@ namespace Veldy.Net.CommandProcessor
 		}
 
 		/// <summary>
-		///     Handles the event.
+		/// Handles the event.
 		/// </summary>
 		/// <param name="store">The store.</param>
-		/// <param name="handled">if set to <c>true</c> [handled].</param>
 		/// <returns>The handled event.</returns>
-		private Tuple<IEventAction<TIdentifier, TStore>, TEvent> HandleEvent(TStore store, ref bool handled)
+		private bool HandleEvent(TStore store)
 		{
-			foreach (var action in _eventActions)
-			{
-				var evt = (TEvent) action.HandleEvent(store, ref handled);
-				if (handled)
-					return new Tuple<IEventAction<TIdentifier, TStore>, TEvent>(action, evt);
-			}
-
-			return null;
+			var handled = false;
+			return _eventActions.Select(action => (TEvent) action.HandleEvent(store, ref handled)).Any(evt => handled);
 		}
 	}
 }

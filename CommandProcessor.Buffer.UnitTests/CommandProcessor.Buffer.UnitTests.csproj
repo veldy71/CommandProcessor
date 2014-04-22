@@ -55,9 +55,11 @@
     <Compile Include="Command.cs" />
     <Compile Include="CommandWithResponse.cs" />
     <Compile Include="EchoCommand.cs" />
-    <Compile Include="Enums.cs" />
+    <Compile Include="EchoEvent.cs" />
+    <Compile Include="EchoResponse.cs" />
+    <Compile Include="MessageIdentifier.cs" />
     <Compile Include="Event.cs" />
-    <Compile Include="EventArgs.cs" />
+    <Compile Include="EchoEventArgs.cs" />
     <Compile Include="ICommand.cs" />
     <Compile Include="ICommandWithResponse.cs" />
     <Compile Include="Identifier.cs" />
@@ -66,6 +68,7 @@
     <Compile Include="IResponse.cs" />
     <Compile Include="Key.cs" />
     <Compile Include="Message.cs" />
+    <Compile Include="MessageType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="SynchronousCommandProcessor.cs" />

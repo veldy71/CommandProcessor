@@ -22,6 +22,19 @@ namespace CommandProcessor.Buffer.UnitTests
 			var random = new Random();
 
 			var commandProcessor = new AsynchronousCommandProcessor();
+			var echoResetEvent = new ManualResetEvent(false);
+			byte[] payload = null;
+			int payloadLength = 0;
+
+			commandProcessor.Echo += (sender, args) =>
+			{
+				if (payloadLength == args.Payload.Length && BufferCompare(payload, args.Payload))
+					Interlocked.Increment(ref eventPayloadsMatched);
+
+				Interlocked.Increment(ref eventsFired);
+				Debug.WriteLine("event fired #" + eventsFired);
+				echoResetEvent.Set();
+			};
 
 			try
 			{
@@ -35,23 +48,13 @@ namespace CommandProcessor.Buffer.UnitTests
 
 				for (var iteration = 0; iteration < iterations; iteration++)
 				{
-					var payloadLength = random.Next(1, 255);
+					payloadLength = random.Next(1, 255);
 
-					var payload = new byte[payloadLength];
+					payload = new byte[payloadLength];
 					random.NextBytes(payload);
 
-					var echoResetEvent = new ManualResetEvent(false);
-
-					commandProcessor.Echo += (sender, args) =>
-					{
-						if (payloadLength == args.Payload.Length && BufferCompare(payload, args.Payload))
-							Interlocked.Increment(ref eventPayloadsMatched);
-
-						Interlocked.Increment(ref eventsFired);
-						echoResetEvent.Set();
-					};
-
 					var echoResponse = commandProcessor.SendCommandWithResponse(new EchoCommand {Payload = payload});
+					Debug.WriteLine("Response #" + (iteration + 1));
 					Assert.IsNotNull(echoResponse);
 					Assert.IsInstanceOfType(echoResponse, typeof (EchoResponse));
 					if (payloadLength == echoResponse.Payload.Length && BufferCompare(payload, echoResponse.Payload))

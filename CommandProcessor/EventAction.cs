@@ -68,8 +68,6 @@ namespace Veldy.Net.CommandProcessor
 
 					return eventByType;
 				}
-
-				return null;
 			}
 
 			return null;
