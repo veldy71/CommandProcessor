@@ -14,6 +14,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CommandProcessor.Buffer.Uni
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{23548A16-C547-4D1D-A4B2-A59E2B45E25D}"
 	ProjectSection(SolutionItems) = preProject
+		CommandProcessor.1.0.0.nupkg = CommandProcessor.1.0.0.nupkg
 		Deploy.bat = Deploy.bat
 	EndProjectSection
 EndProject
