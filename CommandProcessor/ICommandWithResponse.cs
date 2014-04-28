@@ -11,13 +11,6 @@ namespace Veldy.Net.CommandProcessor
 		where TIdentifier : struct, IConvertible, IComparable<TStore>
 		where TStore : class
 	{
-		/// <summary>
-		///     Gets the length of the response.
-		/// </summary>
-		/// <value>
-		///     The length of the response.
-		/// </value>
-		int ResponseLength { get; }
 	}
 
 	/// <summary>
