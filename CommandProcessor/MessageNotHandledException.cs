@@ -6,6 +6,7 @@ namespace Veldy.Net.CommandProcessor
 	/// Class MessageNotHandledException.
 	/// </summary>
 	/// <typeparam name="TStore">The type of the t store.</typeparam>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Usage", "CA2237:MarkISerializableTypesWithSerializable")]
 	public class MessageNotHandledException<TStore> : Exception
 		where TStore : class
 	{

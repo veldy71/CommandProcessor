@@ -16,6 +16,7 @@ namespace Veldy.Net.CommandProcessor
 	/// <typeparam name="TCommandWithResponse">The type of the t command with response.</typeparam>
 	/// <typeparam name="TResponse">The type of the t response.</typeparam>
 	/// <typeparam name="TEvent">The type of the t event.</typeparam>
+	[System.Diagnostics.CodeAnalysis.SuppressMessage("Microsoft.Design", "CA1063:ImplementIDisposableCorrectly")]
 	public abstract class AsynchronousCommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse,
 		TEvent>
 		: CommandProcessor<TIdentifier, TStore, TCommand, TCommandWithResponse, TResponse>,

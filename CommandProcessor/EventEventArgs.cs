@@ -2,6 +2,12 @@
 
 namespace Veldy.Net.CommandProcessor
 {
+	/// <summary>
+	/// Class EventEventArgs.
+	/// </summary>
+	/// <typeparam name="TIdentifier">The type of the t identifier.</typeparam>
+	/// <typeparam name="TStore">The type of the t store.</typeparam>
+	/// <typeparam name="TEvent">The type of the t event.</typeparam>
 	public class EventEventArgs<TIdentifier, TStore, TEvent> : EventArgs
 		where TIdentifier : struct, IConvertible, IComparable<TStore>
 		where TStore : class
